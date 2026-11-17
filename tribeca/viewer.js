@@ -111,7 +111,7 @@ async function buildViewer() {
   scene.background = new THREE.Color('#e8e2d7');
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
   } catch {
     const { createSoftwareRenderer } = await import('./software-renderer.js?v=depth2');
     renderer = createSoftwareRenderer(THREE);
