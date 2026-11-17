@@ -15,8 +15,8 @@ const roomData = [
   ],
   [
     { name: 'Dormitorio posterior', point: [0.7, -4.8], photo: 'bedroom', description: 'Dormitorio de la primera planta alta. Explora su relación con el baño y la circulación.' },
-    { name: 'Dormitorio frontal', point: [-1, 1.4], photo: 'study', description: 'El plano identifica un dormitorio frontal. El render superior lo presenta ambientado como estudio.' },
-    { name: 'Baño', point: [-1.8, -1], photo: 'overhead1', description: 'Baño junto a la circulación de la primera planta alta.' }
+    { name: 'Dormitorio frontal', point: [-1, 1.4], photo: 'front-bedroom', description: 'Dormitorio frontal de la primera planta alta, ambientado con cama doble y veladores.' },
+    { name: 'Baño', point: [-1.8, -1], photo: 'overhead1-bedroom', description: 'Baño junto a la circulación de la primera planta alta.' }
   ],
   [
     { name: 'Dormitorio', point: [-1, 1.5], photo: 'bedroom3', description: 'Dormitorio de la segunda planta alta, conectado con la circulación y el baño.' },
@@ -33,7 +33,7 @@ let stageVisible = false;
 
 function updateFlatView() {
   const renderMode = mode === 'render';
-  floorImage.src = `assets/${renderMode ? 'overhead' : 'plan'}${selectedFloor}.webp`;
+  floorImage.src = renderMode && selectedFloor === 1 ? 'assets/overhead1-bedroom.webp' : `assets/${renderMode ? 'overhead' : 'plan'}${selectedFloor}.webp`;
   floorImage.alt = `${renderMode ? 'Render superior' : 'Plano'} de ${floorNames[selectedFloor].toLowerCase()}`;
   planZoom.dataset.full = floorImage.getAttribute('src');
   planZoom.dataset.caption = `${floorNames[selectedFloor]} · ${renderMode ? 'Render superior' : 'Sin escala'}`;
@@ -250,9 +250,7 @@ async function buildViewer() {
       bath(group, true);stairs(group);
       if (index === 1) {
         bed(group, 0.6, -4.7, Math.PI / 2);
-        block(group, -1, 0.1, 1.65, 1.9, 0.76, 0.95, darkWood);
-        chair(group, -1, 0.65);chair(group, -1, 2.5, Math.PI);
-        block(group, -1, 0.9, 1.65, 0.6, 0.45, 0.06, charcoal);
+        bed(group, -0.75, 1.75, -Math.PI / 2);
       } else {
         bed(group, -0.75, 1.75, -Math.PI / 2);
         block(group, 0.82, 0.09, -4.6, 4.2, 0.3, 4.6, wallTop);
