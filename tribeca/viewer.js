@@ -8,20 +8,20 @@ const planZoom = document.getElementById('plan-zoom');
 const floorNames = ['Planta baja', 'Primera planta alta', 'Segunda planta alta'];
 const roomData = [
   [
-    { name: 'Cocina', point: [0, -5.8], photo: 'living', description: 'Cocina al fondo de la planta social, conectada con el comedor.' },
-    { name: 'Comedor', point: [-0.7, -3.5], photo: 'social', description: 'Un espacio para compartir, junto a la cocina y la sala.' },
-    { name: 'Sala', point: [-1, 0.5], photo: 'living', description: 'Área social abierta, vinculada al acceso y al área exterior.' },
+    { name: 'Cocina', point: [0, -7], photo: 'living', description: 'Cocina al fondo de la planta social, conectada con el comedor.' },
+    { name: 'Comedor', point: [-1.1, -5.3], photo: 'social', description: 'Un espacio para compartir, junto a la cocina y la sala.' },
+    { name: 'Sala', point: [-1.2, -0.3], photo: 'living', description: 'Área social abierta, vinculada al acceso y al área exterior.' },
     { name: 'Área exterior', point: [-0.7, 5.3], photo: 'overhead0', description: 'Área exterior de la planta baja, según el plano y el render superior.' }
   ],
   [
-    { name: 'Dormitorio posterior', point: [0.7, -4.8], photo: 'bedroom', description: 'Dormitorio de la primera planta alta. Explora su relación con el baño y la circulación.' },
-    { name: 'Dormitorio frontal', point: [-1, 1.4], photo: 'front-bedroom', description: 'Dormitorio frontal de la primera planta alta, ambientado con cama doble y veladores.' },
-    { name: 'Baño', point: [-1.8, -1], photo: 'overhead1-bedroom', description: 'Baño junto a la circulación de la primera planta alta.' }
+    { name: 'Dormitorio posterior', point: [1.1, -5.4], photo: 'bedroom', description: 'Dormitorio de la primera planta alta. Explora su relación con el baño y la circulación.' },
+    { name: 'Dormitorio frontal', point: [-1.3, 2.1], photo: 'front-bedroom', description: 'Dormitorio frontal de la primera planta alta, ambientado con cama doble y veladores.' },
+    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead1-bedroom', description: 'Baño junto a la circulación de la primera planta alta.' }
   ],
   [
-    { name: 'Dormitorio', point: [-1, 1.5], photo: 'bedroom3', description: 'Dormitorio de la segunda planta alta, conectado con la circulación y el baño.' },
-    { name: 'Baño', point: [-1.8, -1], photo: 'overhead2', description: 'Baño en la segunda planta alta, según la distribución aportada.' },
-    { name: 'Cubierta y vacío', point: [0.7, -4.7], photo: 'overhead2', description: 'El render superior muestra esta superficie como cubierta. Se representa como volumen referencial.' }
+    { name: 'Dormitorio', point: [-1.3, 1.5], photo: 'bedroom3', description: 'Dormitorio de la segunda planta alta, conectado con la circulación y el baño.' },
+    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead2', description: 'Baño en la segunda planta alta, según la distribución aportada.' },
+    { name: 'Circulación y escalera', point: [2.2, 0.3], photo: 'overhead2', description: 'Escalera lateral y circulación según el plano de la segunda planta alta.' }
   ]
 ];
 let selectedFloor = 0;
@@ -191,74 +191,125 @@ async function buildViewer() {
     const leaves = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 8), foliage);
     leaves.scale.set(1, 1.8, 1);leaves.position.set(x, 0.72, z);parent.add(leaves);
   }
-  function stairs(parent) {
-    for (let i = 0; i < 11; i++) block(parent, 2.22, 0.08, 3.1 - i * 0.32, 1.05, 0.1 + i * 0.115, 0.32, wood);
+  // Coordinates traced from the supplied PDF, rendered at 2x (2382 × 1684).
+  // Each floor uses the same drawing scale. Units are normalized, NOT metres:
+  // the source drawing contains no dimensions or stated scale.
+  const U = 6 / 510;
+  const px = x => (x - 255) * U;
+  const pz = y => (y - 658) * U;
+  function rect(parent, x1, y1, x2, y2, mat, height = 0.025, base = 0.081) {
+    return block(parent, px((x1+x2)/2), base, pz((y1+y2)/2), (x2-x1)*U, height, (y2-y1)*U, mat);
   }
-  function bath(parent, upper = false) {
-    const x = upper ? -1.8 : 2;
-    const z = upper ? -1 : -1.6;
-    block(parent, x, 0.081, z, upper ? 2.1 : 1.35, 0.025, upper ? 2.2 : 2.1, marble);
-    block(parent, x + 0.36, 0.1, z + 0.55, 0.45, 0.4, 0.65, fabric);
-    block(parent, x - 0.25, 0.1, z - 0.65, 0.75, 0.65, 0.42, wood);
-    block(parent, x - 0.25, 0.75, z - 0.65, 0.78, 0.06, 0.45, marble);
-    if (upper) block(parent, x - 0.3, 0.1, z - 0.2, 0.85, 0.28, 1.2, fabric);
+  function partition(parent, x1, y1, x2, y2, mat = ivory, height = 1.35) {
+    return rect(parent, x1, y1, x2, y2, mat, height);
   }
-  function upperSlab(group) {
-    // The supplied architectural plan has a rear recess on the left.
-    block(group, 0, -0.12, 0.65, 6, 0.2, 5.7, paleWood);
-    block(group, 0.82, -0.12, -4.6, 4.36, 0.2, 4.8, paleWood);
+  function windowStrip(parent, x1, y1, x2, y2) {
+    rect(parent,x1,y1,x2,y2,darkWood,0.08,0.08);
+    rect(parent,x1,y1,x2,y2,glass,1.18,0.16);
   }
-  for (let index = 0; index < 3; index++) {
-    const group = new THREE.Group(); scene.add(group);models.push(group);
-    const walls = new THREE.Group();group.add(walls);wallGroups.push(walls);
-    if (index === 0) {
-      block(group, 0, -0.12, 0, 6, 0.2, 14, tile);
-      block(group, 0, 0.081, 5.15, 5.8, 0.02, 3.6, green);
-      for (let i = 0; i < 4; i++) block(group, 1.85, 0.11, 6.5 - i * 0.7, 1.1, 0.07, 0.48, marble);
-      wall(walls, -3, -1.8, 0.16, 10.4);
-      wall(walls, 3, -1.8, 0.16, 10.4);
-      wall(walls, 0, -7, 6, 0.16);
-      wall(walls, 1.25, -1.6, 0.13, 2.15);
-      wall(walls, 2.12, -2.72, 1.75, 0.13);
-      wall(walls, 2.5, -0.49, 0.9, 0.13);
-      wall(walls, -1.4, 3.48, 3.2, 0.14, 0.38);
-      block(walls, -1.4, 0.47, 3.48, 3.2, 1.1, 0.06, glass);
-      block(group, 0, 0.08, -6.48, 5.7, 0.82, 0.88, wood);
-      block(group, 0, 0.9, -6.48, 5.78, 0.07, 0.95, marble);
-      block(group, -1.5, 0.98, -6.48, 0.85, 0.04, 0.6, charcoal);
-      block(group, 2.3, 0.1, -5.5, 0.9, 1.8, 0.85, marble);
-      block(group, -0.8, 0.1, -3.5, 1.25, 0.73, 2, wood);
-      for (const z of [-4.1, -3, -2.4]) { chair(group, -1.75, z, -Math.PI / 2);chair(group, 0.15, z, Math.PI / 2); }
-      block(group, -1.8, 0.12, 1, 1, 0.55, 2.4, fabric);
-      block(group, -2.25, 0.5, 1, 0.17, 0.4, 2.4, fabric);
-      block(group, -0.35, 0.1, 1, 0.9, 0.4, 1.15, paleWood);
-      block(group, 0.95, 0.15, 1, 0.15, 1.3, 1.35, charcoal);
-      bath(group);stairs(group);plant(group, -2.1, 5.2);
+  function planBed(parent,x1,y1,x2,y2,headRight = false) {
+    const g = new THREE.Group();
+    g.position.set(px((x1+x2)/2),0,pz((y1+y2)/2));
+    g.rotation.y = headRight ? Math.PI/2 : -Math.PI/2;
+    // Resize the bed itself to its actual symbol footprint in the source plan.
+    g.scale.set((y2-y1)*U/1.85,1,(x2-x1)*U/2.35);
+    parent.add(g);
+    bed(g,0,0);
+  }
+  function sanitary(parent,upper) {
+    if (upper) {
+      rect(parent,14,403,285,533,marble);
+      rect(parent,18,407,94,531,fabric,0.26);
+      rect(parent,24,413,88,523,marble,0.03,0.34);
+      rect(parent,126,465,169,526,fabric,0.39);
+      rect(parent,199,480,258,530,wood,0.66);
+      rect(parent,197,478,260,532,marble,0.055,0.74);
     } else {
-      upperSlab(group);
-      wall(walls, 3, -1.8, 0.16, 10.4);
-      wall(walls, 0.82, -7, 4.36, 0.16);
-      wall(walls, -1.36, -4.6, 0.16, 4.8);
-      wall(walls, -3, 0.65, 0.16, 5.7);
-      wall(walls, -2.15, -2.2, 1.7, 0.16);
-      wall(walls, -1.8, 0.2, 2.4, 0.13);
-      wall(walls, -0.6, -1.3, 0.13, 1.8);
-      wall(walls, 0.7, -2.2, 2.2, 0.13);
-      wall(walls, 1.45, 1.95, 0.13, 3.1);
-      wall(walls, -0.8, 3.5, 4.4, 0.16, 0.42);
-      block(walls, -0.8, 0.5, 3.5, 4.35, 1.05, 0.05, glass);
-      bath(group, true);stairs(group);
-      if (index === 1) {
-        bed(group, 0.6, -4.7, Math.PI / 2);
-        bed(group, -0.75, 1.75, -Math.PI / 2);
-      } else {
-        bed(group, -0.75, 1.75, -Math.PI / 2);
-        block(group, 0.82, 0.09, -4.6, 4.2, 0.3, 4.6, wallTop);
-      }
-      plant(group, -2.4, 2.9);
+      rect(parent,397,333,498,520,marble);
+      rect(parent,428,445,471,515,fabric,0.39);
+      rect(parent,461,369,495,419,wood,0.65);
+      rect(parent,459,367,497,421,marble,0.055,0.73);
     }
   }
-  const plinth = block(scene, 0, -0.65, 0, 7.2, 0.3, 15.2, material('#d0c3ae'));
+  function stairFlight(parent,upper) {
+    const start = upper ? 397 : 532;
+    const end = 839;
+    const count = upper ? 17 : 12;
+    const run = (end-start)/count;
+    for(let i=0;i<count;i++) {
+      rect(parent,397,end-(i+1)*run,499,end-i*run,wood,0.1+i*0.085);
+      // Tread nosing makes the direction and individual steps legible.
+      rect(parent,397,end-(i+1)*run,499,end-(i+1)*run+1.5,darkWood,0.012,0.19+i*0.085);
+    }
+  }
+  for (let index=0; index<3; index++) {
+    const group = new THREE.Group(); scene.add(group); models.push(group);
+    const walls = new THREE.Group(); group.add(walls); wallGroups.push(walls);
+    if(index===0) {
+      rect(group,0,0,510,1316,tile,0.2,-0.12);
+      rect(group,11,782,295,1316,green);
+      rect(group,295,953,498,1316,green);
+      for(let i=0;i<6;i++) rect(group,295,976+i*54,403,1015+i*54,marble,0.05,0.11);
+      rect(group,11,782,284,1316,green);
+      rect(group,284,953,499,1316,green);
+      for(let y=977;y<1280;y+=55) rect(group,294,y,404,y+40,marble,0.05);
+      [[0,0,510,12],[0,0,12,782],[498,0,510,953],
+       [385,204,397,333],[385,318,498,330],[385,407,397,533],
+       [385,520,498,533],[283,771,295,851],[397,839,431,851],[476,839,510,851]]
+        .forEach(r=>partition(walls,...r));
+      windowStrip(walls,11,772,283,782);
+      windowStrip(walls,431,840,476,850);
+      // Kitchen, laundry niche, six-seat dining and L-shaped living room.
+      rect(group,12,12,430,80,wood,0.82);
+      rect(group,12,12,430,80,marble,0.05,0.9);
+      rect(group,148,19,209,73,charcoal,0.025,0.96);
+      rect(group,279,23,365,69,glass,0.025,0.96);
+      rect(group,430,12,498,80,marble,1.65);
+      rect(group,417,225,485,294,marble,0.82);
+      rect(group,72,166,229,251,wood,0.74);
+      for(const x of [111,188]) {
+        chair(group,px(x),pz(147));chair(group,px(x),pz(270),Math.PI);
+      }
+      chair(group,px(51),pz(208),-Math.PI/2);
+      chair(group,px(250),pz(208),Math.PI/2);
+      rect(group,16,496,106,768,fabric,0.56);
+      rect(group,16,496,237,585,fabric,0.56);
+      rect(group,16,496,31,768,paleWood,0.32,0.64);
+      rect(group,31,496,237,510,paleWood,0.32,0.64);
+      rect(group,165,617,222,674,paleWood,0.4);
+      sanitary(group,false);stairFlight(group,false);
+      plant(group,px(70),pz(980));
+    } else {
+      // Front volume is identical on both upper floors. Rear bedroom exists
+      // only on the FIRST upper floor, as the architectural plan specifies.
+      rect(group,0,386,397,941,paleWood,0.2,-0.12);
+      rect(group,397,386,510,851,paleWood,0.2,-0.12);
+      if(index===1) rect(group,170,0,510,386,paleWood,0.2,-0.12);
+      rect(group,12,544,284,611,paleWood,0.52); // built-in wardrobe
+      [[0,386,103,398],[170,386,302,398],[0,386,12,941],
+       [12,533,295,545],[284,477,296,612],[284,709,296,929],
+       [386,839,397,941],[397,839,431,851],[476,839,510,851],
+       [498,386,510,851]]
+        .forEach(r=>partition(walls,...r));
+      windowStrip(walls,103,387,170,397);
+      windowStrip(walls,12,929,386,941);
+      windowStrip(walls,431,840,476,850);
+      sanitary(group,true);stairFlight(group,true);
+      planBed(group,61,759-(index===2?51:0),238,882-(index===2?51:0));
+      if(index===1) {
+        [[170,0,510,12],[170,0,182,159],[498,0,510,386],
+         [397,386,510,398]].forEach(r=>partition(walls,...r));
+        windowStrip(walls,170,159,181,386);
+        rect(group,182,12,498,78,paleWood,0.64); // rear wardrobe
+        planBed(group,273,145,493,269,true);
+      } else {
+        // No invented rear slab/roof: this area is absent from the second plan.
+        partition(walls,170,386,295,398);
+        windowStrip(walls,295,387,397,397);
+      }
+    }
+  }
+  const plinth = block(scene, 0, -0.65, 0, 7.2, 0.3, 16.5, material('#d0c3ae'));
   plinth.receiveShadow = true;
   const selection = new THREE.Mesh(new THREE.RingGeometry(0.45, 0.54, 40), new THREE.MeshBasicMaterial({ color: '#b18a45', side: THREE.DoubleSide, transparent: true, opacity: 0.95 }));
   selection.rotation.x = -Math.PI / 2;selection.visible = false;scene.add(selection);
@@ -315,7 +366,7 @@ async function buildViewer() {
     camera.aspect = width / height;camera.updateProjectionMatrix();renderer.setSize(width, height, false);draw();
   }
   function resetCamera(top = false) {
-    controls.target.set(0, wholeHouse ? 3.8 : 0.3, -0.5);
+    controls.target.set(0, wholeHouse ? 3.8 : 0.3, selectedFloor === 2 && !wholeHouse ? 0 : -1.2);
     camera.position.set(top ? 0.01 : 12, wholeHouse ? 24 : top ? 23 : 16, wholeHouse ? 26 : top ? 0.01 : 17);
     controls.update();draw();
   }
