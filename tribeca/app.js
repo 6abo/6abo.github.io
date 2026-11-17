@@ -110,6 +110,7 @@ function selectFloor(index, focus = false) {
   planZoom.dataset.full = floorImage.getAttribute('src');
   planZoom.dataset.caption = `${floor.name} · Sin escala`;
   planZoom.setAttribute('aria-label', `Ampliar plano de ${floor.name.toLowerCase()}`);
+  document.dispatchEvent(new CustomEvent('tribecca:floor', { detail: index }));
   if (focus) tabs[index].focus();
 }
 tabs.forEach((tab, index) => {
@@ -129,14 +130,42 @@ tabs.forEach((tab, index) => {
 const lightbox = document.getElementById('lightbox');
 const lightboxImage = document.getElementById('lightbox-image');
 const lightboxCaption = document.getElementById('lightbox-caption');
-document.querySelectorAll('[data-full]').forEach(button => {
-  button.addEventListener('click', () => {
+let lightboxButtons = [];
+let lightboxIndex = 0;
+function showLightboxImage(index) {
+    lightboxIndex = (index + lightboxButtons.length) % lightboxButtons.length;
+    const button = lightboxButtons[lightboxIndex];
     lightboxImage.src = button.dataset.full;
     lightboxImage.alt = button.dataset.caption;
     lightboxCaption.textContent = button.dataset.caption;
+}
+document.querySelectorAll('[data-full]').forEach(button => {
+  button.addEventListener('click', () => {
+    const tile = button.closest('.gallery-tile');
+    lightboxButtons = tile
+      ? [...document.querySelectorAll('.gallery-tile:not([hidden]) [data-full]')]
+      : [button];
+    showLightboxImage(lightboxButtons.indexOf(button));
+    document.querySelector('.lightbox-prev').hidden = lightboxButtons.length < 2;
+    document.querySelector('.lightbox-next').hidden = lightboxButtons.length < 2;
     lightbox.showModal();
   });
 });
 document.querySelector('.lightbox-close').addEventListener('click', () => lightbox.close());
 lightbox.addEventListener('click', event => { if (event.target === lightbox) lightbox.close(); });
 lightbox.addEventListener('close', () => { lightboxImage.removeAttribute('src'); });
+document.querySelector('.lightbox-prev').addEventListener('click', () => showLightboxImage(lightboxIndex - 1));
+document.querySelector('.lightbox-next').addEventListener('click', () => showLightboxImage(lightboxIndex + 1));
+lightbox.addEventListener('keydown', event => {
+  if (event.key === 'ArrowLeft') { event.preventDefault(); showLightboxImage(lightboxIndex - 1); }
+  if (event.key === 'ArrowRight') { event.preventDefault(); showLightboxImage(lightboxIndex + 1); }
+});
+const galleryTiles = [...document.querySelectorAll('.gallery-tile')];
+document.querySelectorAll('[data-filter]').forEach(button => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('[data-filter]').forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+    galleryTiles.forEach(tile => { tile.hidden = button.dataset.filter !== 'all' && tile.dataset.category !== button.dataset.filter; });
+    const count = galleryTiles.filter(tile => !tile.hidden).length;
+    document.getElementById('gallery-status').textContent = `${count} imágenes del proyecto`;
+  });
+});
