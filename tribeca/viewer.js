@@ -56,7 +56,7 @@ async function setMode(nextMode) {
   engine?.view(mode);
 }
 document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => setMode(button.dataset.view)));
-document.addEventListener('tribecca:floor', event => {
+document.addEventListener('tribeca:floor', event => {
   selectedFloor = event.detail;
   wholeHouse = false;
   document.getElementById('whole-house').setAttribute('aria-pressed', 'false');
@@ -119,7 +119,7 @@ async function buildViewer() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.setClearColor('#e8e2d7');
   mount.append(renderer.domElement);
-  renderer.domElement.setAttribute('aria-label', 'Casa tridimensional de Tribecca');
+  renderer.domElement.setAttribute('aria-label', 'Casa tridimensional de Tribeca');
   const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 150);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;

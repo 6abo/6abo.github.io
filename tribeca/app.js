@@ -110,7 +110,7 @@ function selectFloor(index, focus = false) {
   planZoom.dataset.full = floorImage.getAttribute('src');
   planZoom.dataset.caption = `${floor.name} · Sin escala`;
   planZoom.setAttribute('aria-label', `Ampliar plano de ${floor.name.toLowerCase()}`);
-  document.dispatchEvent(new CustomEvent('tribecca:floor', { detail: index }));
+  document.dispatchEvent(new CustomEvent('tribeca:floor', { detail: index }));
   if (focus) tabs[index].focus();
 }
 tabs.forEach((tab, index) => {
