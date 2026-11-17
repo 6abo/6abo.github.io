@@ -16,24 +16,26 @@ const roomData = [
   [
     { name: 'Dormitorio posterior', point: [1.1, -5.4], photo: 'bedroom', description: 'Dormitorio de la primera planta alta. Explora su relación con el baño y la circulación.' },
     { name: 'Dormitorio frontal', point: [-1.3, 2.1], photo: 'front-bedroom', description: 'Dormitorio frontal de la primera planta alta, ambientado con cama doble y veladores.' },
-    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead1-bedroom', description: 'Baño junto a la circulación de la primera planta alta.' }
+    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead1-wall', description: 'Baño junto a la circulación de la primera planta alta.' }
   ],
   [
     { name: 'Dormitorio', point: [-1.3, 1.5], photo: 'bedroom3', description: 'Dormitorio de la segunda planta alta, conectado con la circulación y el baño.' },
-    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead2', description: 'Baño en la segunda planta alta, según la distribución aportada.' },
-    { name: 'Circulación y escalera', point: [2.2, 0.3], photo: 'overhead2', description: 'Escalera lateral y circulación según el plano de la segunda planta alta.' }
+    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead2-wall', description: 'Baño en la segunda planta alta, según la distribución aportada.' },
+    { name: 'Espacio construido', point: [1.1, -5.5], photo: 'overhead2-wall', description: 'Recinto construido de piso gris, incorporado según la imagen superior y la aclaración del proyecto. Uso no especificado.' },
+    { name: 'Circulación y escalera', point: [2.2, 0.3], photo: 'overhead2-wall', description: 'Llegada de la escalera desde la primera planta alta. No se añade una subida hacia un cuarto nivel.' }
   ]
 ];
 let selectedFloor = 0;
 let mode = '3d';
 let wholeHouse = false;
+let openFacade = false;
 let engine;
 let initialization;
 let stageVisible = false;
 
 function updateFlatView() {
   const renderMode = mode === 'render';
-  floorImage.src = renderMode && selectedFloor === 1 ? 'assets/overhead1-bedroom.webp' : `assets/${renderMode ? 'overhead' : 'plan'}${selectedFloor}.webp`;
+  floorImage.src = renderMode && selectedFloor > 0 ? `assets/overhead${selectedFloor}-wall.webp` : `assets/${renderMode ? 'overhead' : 'plan'}${selectedFloor}.webp`;
   floorImage.alt = `${renderMode ? 'Render superior' : 'Plano'} de ${floorNames[selectedFloor].toLowerCase()}`;
   planZoom.dataset.full = floorImage.getAttribute('src');
   planZoom.dataset.caption = `${floorNames[selectedFloor]} · ${renderMode ? 'Render superior' : 'Sin escala'}`;
@@ -50,7 +52,7 @@ async function setMode(nextMode) {
   document.getElementById('viewer-instructions').textContent = is3D
     ? 'Arrastra para girar · Pellizca para acercar · Toca un ambiente'
     : 'Toca la imagen para ampliarla';
-  document.getElementById('viewer-mode-label').textContent = mode === 'top' ? 'VISTA SUPERIOR 3D' : 'MODELO 3D';
+  document.getElementById('viewer-mode-label').textContent = wholeHouse ? (openFacade ? 'CORTE INTERIOR · 2 ESCALERAS' : 'EXTERIOR 3D') : mode === 'top' ? 'VISTA SUPERIOR 3D' : 'MODELO 3D';
   if (!is3D) { updateFlatView(); return; }
   await initialize();
   engine?.view(mode);
@@ -68,11 +70,12 @@ document.addEventListener('tribeca:floor', event => {
 document.getElementById('whole-house').addEventListener('click', async () => {
   wholeHouse = !wholeHouse;
   document.getElementById('whole-house').setAttribute('aria-pressed', String(wholeHouse));
-  document.getElementById('viewer-floor-name').textContent = wholeHouse ? 'CASA · TRES NIVELES' : floorNames[selectedFloor].toUpperCase();
+  document.getElementById('viewer-floor-name').textContent = wholeHouse ? 'CASA COMPLETA · TRES NIVELES' : floorNames[selectedFloor].toUpperCase();
   document.getElementById('room-detail').hidden = true;
   await initialize();
   engine?.floor(selectedFloor, wholeHouse);
 });
+document.getElementById('open-facade').addEventListener('change', event => { openFacade = event.target.checked; engine?.floor(selectedFloor, wholeHouse); });
 document.getElementById('show-walls').addEventListener('change', event => engine?.walls(event.target.checked));
 document.getElementById('room-close').addEventListener('click', () => {
   document.getElementById('room-detail').hidden = true;
@@ -110,7 +113,7 @@ async function buildViewer() {
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   } catch {
-    const { createSoftwareRenderer } = await import('./software-renderer.js');
+    const { createSoftwareRenderer } = await import('./software-renderer.js?v=depth2');
     renderer = createSoftwareRenderer(THREE);
   }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -157,6 +160,10 @@ async function buildViewer() {
   const glass = material('#a3b8bb', { transparent: true, opacity: 0.32, roughness: 0.15 });
   const models = [];
   const wallGroups = [];
+  const shells = [];
+  const LEVEL = 3.2;
+  const brick = material('#b77e58');
+  const concrete = material('#777776');
   function block(parent, x, y, z, width, height, depth, mat) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), mat);
     mesh.position.set(x, y + height / 2, z);
@@ -237,9 +244,9 @@ async function buildViewer() {
     const count = upper ? 17 : 12;
     const run = (end-start)/count;
     for(let i=0;i<count;i++) {
-      rect(parent,397,end-(i+1)*run,499,end-i*run,wood,0.1+i*0.085);
+      rect(parent,397,end-(i+1)*run,499,end-i*run,wood,0.1+i*(LEVEL-0.1)/(count-1));
       // Tread nosing makes the direction and individual steps legible.
-      rect(parent,397,end-(i+1)*run,499,end-(i+1)*run+1.5,darkWood,0.012,0.19+i*0.085);
+      rect(parent,397,end-(i+1)*run,499,end-(i+1)*run+1.5,darkWood,0.012,0.19+i*(LEVEL-0.1)/(count-1));
     }
   }
   for (let index=0; index<3; index++) {
@@ -247,12 +254,7 @@ async function buildViewer() {
     const walls = new THREE.Group(); group.add(walls); wallGroups.push(walls);
     if(index===0) {
       rect(group,0,0,510,1316,tile,0.2,-0.12);
-      rect(group,11,782,295,1316,green);
-      rect(group,295,953,498,1316,green);
-      for(let i=0;i<6;i++) rect(group,295,976+i*54,403,1015+i*54,marble,0.05,0.11);
-      rect(group,11,782,284,1316,green);
-      rect(group,284,953,499,1316,green);
-      for(let y=977;y<1280;y+=55) rect(group,294,y,404,y+40,marble,0.05);
+
       [[0,0,510,12],[0,0,12,782],[498,0,510,953],
        [385,204,397,333],[385,318,498,330],[385,407,397,533],
        [385,520,498,533],[283,771,295,851],[397,839,431,851],[476,839,510,851]]
@@ -280,11 +282,11 @@ async function buildViewer() {
       sanitary(group,false);stairFlight(group,false);
       plant(group,px(70),pz(980));
     } else {
-      // Front volume is identical on both upper floors. Rear bedroom exists
-      // only on the FIRST upper floor, as the architectural plan specifies.
+      // Front geometry follows the plan; rear gray built room on level 3
+      // is confirmed by the owner and the supplied overhead image.
       rect(group,0,386,397,941,paleWood,0.2,-0.12);
       rect(group,397,386,510,851,paleWood,0.2,-0.12);
-      if(index===1) rect(group,170,0,510,386,paleWood,0.2,-0.12);
+      rect(group,170,0,510,386,index===2 ? concrete : paleWood,0.2,-0.12);
       rect(group,12,544,284,611,paleWood,0.52); // built-in wardrobe
       [[0,386,103,398],[170,386,302,398],[0,386,12,941],
        [12,533,295,545],[284,477,296,612],[284,709,296,929],
@@ -294,7 +296,17 @@ async function buildViewer() {
       windowStrip(walls,103,387,170,397);
       windowStrip(walls,12,929,386,941);
       windowStrip(walls,431,840,476,850);
-      sanitary(group,true);stairFlight(group,true);
+      sanitary(group,true);
+      if(index===1) stairFlight(group,true);
+      else {
+        // Arrival/void only: exactly two ascending connections for 3 levels.
+        rect(group,397,398,498,839,charcoal,0.02,0.09);
+        rect(group,385,503,392,839,darkWood,0.85);
+        rect(group,397,386,498,403,paleWood,0.04);
+      }
+      // Front bedroom partition and inward-opening door, traced from plan.
+      const door = rect(group,205,701,284,706,wood,1.1);
+      door.userData.role = 'front-bedroom-door';
       planBed(group,61,759-(index===2?51:0),238,882-(index===2?51:0));
       if(index===1) {
         [[170,0,510,12],[170,0,182,159],[498,0,510,386],
@@ -303,11 +315,67 @@ async function buildViewer() {
         rect(group,182,12,498,78,paleWood,0.64); // rear wardrobe
         planBed(group,273,145,493,269,true);
       } else {
-        // No invented rear slab/roof: this area is absent from the second plan.
-        partition(walls,170,386,295,398);
+        [[170,0,510,12],[170,0,182,386],[498,0,510,386],
+         [170,386,295,398],[397,386,510,398]].forEach(r=>partition(walls,...r));
         windowStrip(walls,295,387,397,397);
       }
     }
+  }
+  // Continuous exterior envelope, assembled at structural floor heights.
+  // Reference: white projecting frames, dark glazing, terracotta screens.
+  // One house is shown; the reference images also depict neighboring units.
+  function facadeWindow(parent,x1,y1,x2,y2,base=0.2,height=2.65) {
+    rect(parent,x1,y1,x2,y2,charcoal,height+0.1,base);
+    rect(parent,x1+2,y1+1,x2-2,y2+1,glass,height-0.06,base+0.05);
+  }
+  for(let i=0;i<3;i++) {
+    const shell = new THREE.Group();scene.add(shell);shells.push(shell);
+    // Side and rear enclosure: actual staggered footprint, same scale as plan.
+    if(i===0) {
+      [[0,0,510,12],[0,0,12,772],[498,0,510,953],
+       [283,782,295,851]].forEach(r=>partition(shell,...r,ivory,LEVEL));
+      facadeWindow(shell,12,773,283,781,0.16,2.8);
+      rect(shell,295,840,397,850,wood,2.8);
+      rect(shell,295,839,397,851,ivory,0.32,2.88);
+    } else {
+      [[0,386,12,941],[0,386,170,398],[170,0,182,386],
+       [170,0,510,12],[498,0,510,550],[498,800,510,851],[386,839,397,941],
+       [397,839,431,851],[476,839,510,851]]
+        .forEach(r=>partition(shell,...r,ivory,LEVEL));
+      rect(shell,498,550,503,800,charcoal,2.6,0.28);
+      rect(shell,503,552,505,798,glass,2.5,0.33);
+      facadeWindow(shell,431,840,476,851,0.28,2.6);
+      // Front glazing sits behind a perforated brick screen.
+      facadeWindow(shell,12,924,385,929,0.22,2.72);
+      rect(shell,0,929,397,946,ivory,0.22,0.08);
+      rect(shell,0,929,397,946,ivory,0.24,LEVEL-0.16);
+      rect(shell,0,929,14,946,ivory,LEVEL);
+      rect(shell,383,929,397,946,ivory,LEVEL);
+      for(let row=0;row<14;row++) {
+        for(let col=0;col<8;col++) {
+          const x=129+col*30+(row%2)*8;
+          rect(shell,x,935,x+22,944,brick,0.13,0.35+row*0.18);
+        }
+      }
+      // Slim mullions remain visible beside the screen.
+      rect(shell,118,925,122,931,charcoal,2.72,0.22);
+      rect(shell,12,929,128,933,charcoal,0.035,1.5);
+      rect(shell,12,929,128,933,glass,0.9,0.3);
+      // Projecting white frame around the stair-side entrance.
+      rect(shell,397,839,510,852,ivory,0.22,LEVEL-0.16);
+      rect(shell,498,839,510,852,ivory,LEVEL);
+    }
+    if(i===2) {
+      rect(shell,0,386,397,946,ivory,0.22,LEVEL);
+      rect(shell,397,386,510,851,ivory,0.22,LEVEL);
+      rect(shell,170,0,510,386,ivory,0.22,LEVEL);
+    }
+    if(i===2) {
+      rect(shell,0,386,397,941,ivory,0.18,LEVEL);
+      rect(shell,397,386,510,851,ivory,0.18,LEVEL);
+      rect(shell,170,0,510,386,concrete,0.18,LEVEL);
+    }
+    shell.visible=false;
   }
   const plinth = block(scene, 0, -0.65, 0, 7.2, 0.3, 16.5, material('#d0c3ae'));
   plinth.receiveShadow = true;
@@ -366,18 +434,24 @@ async function buildViewer() {
     camera.aspect = width / height;camera.updateProjectionMatrix();renderer.setSize(width, height, false);draw();
   }
   function resetCamera(top = false) {
-    controls.target.set(0, wholeHouse ? 3.8 : 0.3, selectedFloor === 2 && !wholeHouse ? 0 : -1.2);
-    camera.position.set(top ? 0.01 : 12, wholeHouse ? 24 : top ? 23 : 16, wholeHouse ? 26 : top ? 0.01 : 17);
+    controls.target.set(0, wholeHouse ? 4.3 : 0.3, -1.2);
+    camera.position.set(top ? 0.01 : 13, wholeHouse ? (top ? 29 : 15) : top ? 25 : 16, top ? -1.19 : wholeHouse ? 22 : 17);
+    camera.lookAt(controls.target);
+    controls.enableDamping = false;
     controls.update();draw();
   }
   function showFloor(index, all) {
     wholeHouse = all;
-    models.forEach((group, i) => { group.visible = all || i === index;group.position.y = all ? i * 4.2 : 0; });
+    models.forEach((group, i) => { group.visible = all || i === index;group.position.y = all ? i * LEVEL : 0; });
+    shells.forEach((shell,i)=>{shell.visible=all && !openFacade;shell.position.y=i*LEVEL;});
+    wallGroups.forEach(group=>{group.visible=(!all || openFacade) && document.getElementById('show-walls').checked;});
+    document.getElementById('facade-option').hidden = !all;
+    document.getElementById('viewer-mode-label').textContent = all ? (openFacade ? 'CORTE INTERIOR · 2 ESCALERAS' : 'EXTERIOR 3D') : mode === 'top' ? 'VISTA SUPERIOR 3D' : 'MODELO 3D';
     selection.visible = false;selectedRoom = -1;makeHotspots();resetCamera(mode === 'top');size();startAnimation();
   }
   engine = {
     floor: showFloor,
-    walls: show => { wallGroups.forEach(group => { group.visible = show; });draw(); },
+    walls: show => { wallGroups.forEach(group => { group.visible = show && (!wholeHouse || openFacade); });draw(); },
     clearSelection: () => { selection.visible = false;selectedRoom = -1;hotspots.querySelectorAll('button').forEach(button => button.setAttribute('aria-pressed', 'false'));draw(); },
     view: next => { size();resetCamera(next === 'top');startAnimation(); },
     visibility: startAnimation
