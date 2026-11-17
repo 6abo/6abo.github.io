@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3efe7">
+  <meta name="description" content="Conoce Tribecca, casas y suites en De la Verbena, Cuenca. Explora su arquitectura, interiores, distribución y ubicación. Agenda una presentación con Raúl García.">
+  <meta property="og:title" content="Tribecca · Casas & Suites en Cuenca">
+  <meta property="og:description" content="Arquitectura con carácter. Descubre tu próximo espacio en Cuenca.">
+  <meta property="og:type" content="website">
+  <title>TRIBECCA · Casas & Suites · Cuenca</title>
+  <link rel="preload" href="assets/montserrat.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/day.webp" as="image">
+  <link rel="preload" href="assets/night.webp" as="image">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#proyecto">Saltar al contenido</a>
+  <header class="header">
+    <a class="wordmark" href="#inicio" aria-label="Tribecca, inicio">TRIBECCA<span>CASAS & SUITES</span></a>
+    <nav aria-label="Navegación principal">
+      <a href="#proyecto">El proyecto</a><a href="#espacios">Espacios</a><a href="#planos">Planos</a><a href="#ubicacion">Ubicación</a>
+    </nav>
+    <a class="header-contact" href="#contacto">Agenda una visita <span aria-hidden="true">↗</span></a>
+    <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Abrir menú"><span></span><span></span></button>
+  </header>
+  <nav id="mobile-menu" class="mobile-menu" aria-label="Navegación móvil" hidden>
+    <a href="#proyecto">El proyecto</a><a href="#espacios">Espacios</a><a href="#planos">Planos</a><a href="#ubicacion">Ubicación</a><a href="#contacto">Agenda una visita ↗</a>
+  </nav>
+  <main>
+    <section class="hero-scroll" id="inicio" aria-label="Tribecca de día a noche">
+      <div class="hero-sticky">
+        <div class="hero-visual">
+          <img class="hero-image day" src="assets/day.webp" width="1920" height="1080" alt="Vista diurna de las casas de Tribecca, con celosías de ladrillo y montañas al fondo" fetchpriority="high">
+          <img class="hero-image night" src="assets/night.webp" width="1920" height="1080" alt="" aria-hidden="true">
+          <div class="hero-shade"></div>
+        </div>
+        <div class="hero-top"><span>DE LA VERBENA · CUENCA</span><span>ARQUITECTURA PARA VIVIR</span></div>
+        <h1>TRIBECCA</h1>
+        <div class="hero-bottom"><p>Un lugar.<br>Muchas formas de vivirlo.</p><a href="#proyecto" class="explore">Descubre el proyecto <span aria-hidden="true">↓</span></a></div>
+        <div class="day-cycle" aria-label="Cambio de iluminación con el scroll"><span class="sun" aria-hidden="true">☀</span><span class="cycle-track"><span></span></span><span class="moon" aria-hidden="true">☾</span><span id="light-label">Luz de día</span></div>
+      </div>
+    </section>
+
+    <section class="intro section-wrap" id="proyecto">
+      <div class="section-kicker"><span>EL PROYECTO</span><span>CUENCA, ECUADOR</span></div>
+      <div class="intro-grid"><h2>ARQUITECTURA<br>CON <em>CARÁCTER.</em></h2><div class="intro-copy"><p>Celosías de ladrillo, líneas definidas y una paleta de materiales cálidos. Una propuesta contemporánea para habitar Cuenca.</p><p>Casas y suites con espacios que acompañan tu día a día, desde la primera luz hasta el caer de la tarde.</p><a class="text-link" href="#espacios">Conoce los espacios <span aria-hidden="true">↗</span></a></div></div>
+      <figure class="architecture"><button class="image-button" data-full="assets/front.webp" data-caption="La fachada · Tribecca" aria-label="Ampliar vista frontal de Tribecca"><img src="assets/front.webp" width="1920" height="1080" loading="lazy" alt="Fachada frontal con celosías de ladrillo, balcones y acceso vehicular"><span class="zoom-icon" aria-hidden="true">↗</span></button><figcaption><span>LA FACHADA</span><span>LADRILLO · LUZ · IDENTIDAD</span></figcaption></figure>
+    </section>
+
+    <section class="spaces section-wrap" id="espacios">
+      <div class="section-kicker"><span>INTERIORES</span><span>ESPACIOS QUE SE CONECTAN</span></div>
+      <div class="spaces-heading"><h2>ESPACIOS PARA<br><em>COMPARTIR.</em></h2><p>Sala, comedor y cocina<br>en una planta social abierta.</p></div>
+      <div class="gallery-social"><button class="image-button social-main" data-full="assets/living.webp" data-caption="Sala, comedor y cocina · Interior de la casa" aria-label="Ampliar sala y comedor"><img src="assets/living.webp" width="1920" height="1080" loading="lazy" alt="Sala abierta conectada con comedor y cocina, con escalera interior"><span class="zoom-icon" aria-hidden="true">↗</span></button><div class="social-side"><p class="small-label">INTERIOR DE LA CASA</p><h3>Vivir con<br>naturalidad.</h3><p>Texturas cálidas.<br>Ambientes conectados.<br>Vida cotidiana.</p><button class="image-button" data-full="assets/social.webp" data-caption="El comedor · Interior de la casa" aria-label="Ampliar vista del comedor"><img src="assets/social.webp" width="1920" height="1080" loading="lazy" alt="Comedor familiar con madera y luz natural"><span class="zoom-icon" aria-hidden="true">↗</span></button></div></div>
+      <div class="bedrooms-heading"><h2>TU ESPACIO,<br><em>A TU RITMO.</em></h2><p>Un ambiente para descansar.</p></div>
+      <div class="bedrooms-grid"><button class="image-button" data-full="assets/bedroom.webp" data-caption="Dormitorio · Casa" aria-label="Ampliar primer dormitorio"><img src="assets/bedroom.webp" width="1920" height="1080" loading="lazy" alt="Dormitorio con ventanal y revestimiento de madera"><span class="zoom-icon" aria-hidden="true">↗</span></button><button class="image-button" data-full="assets/bedroom2.webp" data-caption="Dormitorio · Casa" aria-label="Ampliar segundo dormitorio"><img src="assets/bedroom2.webp" width="1920" height="1080" loading="lazy" alt="Dormitorio de la casa con iluminación cálida y armario de madera"><span class="zoom-icon" aria-hidden="true">↗</span></button></div>
+      <div class="suite-row"><div><span class="small-label">SUITES</span><h3>Otra forma<br>de habitar.</h3><p>Ambientes integrados y una paleta natural para acompañar lo cotidiano.</p><a class="text-link" href="https://wa.me/593984291918?text=Hola%20Ra%C3%BAl%2C%20quisiera%20informaci%C3%B3n%20sobre%20las%20suites%20de%20Tribecca." target="_blank" rel="noopener">Consulta por las suites ↗</a></div><button class="image-button" data-full="assets/suite.webp" data-caption="Área social · Suite" aria-label="Ampliar interior de suite"><img src="assets/suite.webp" width="1920" height="1080" loading="lazy" alt="Interior de suite con sala y cocina integrada"><span class="zoom-icon" aria-hidden="true">↗</span></button></div>
+    </section>
+
+    <section class="floor-section section-wrap" id="planos">
+      <div class="section-kicker"><span>DISTRIBUCIÓN DE LA CASA</span><span>TRES NIVELES</span></div>
+      <div class="floor-grid"><div class="floor-copy"><h2>UN ESPACIO<br>PARA CADA<br><em>MOMENTO.</em></h2><div class="floor-tabs" role="tablist" aria-label="Selecciona una planta"><button id="tab-0" role="tab" aria-selected="true" aria-controls="floor-panel" data-floor="0">Planta baja <span>↗</span></button><button id="tab-1" role="tab" aria-selected="false" aria-controls="floor-panel" data-floor="1" tabindex="-1">Primera planta alta <span>↗</span></button><button id="tab-2" role="tab" aria-selected="false" aria-controls="floor-panel" data-floor="2" tabindex="-1">Segunda planta alta <span>↗</span></button></div><ul id="floor-details"><li>Sala y comedor</li><li>Cocina</li><li>Baño social</li><li>Área exterior</li></ul></div><div class="floor-panel" id="floor-panel" role="tabpanel" aria-labelledby="tab-0" tabindex="0"><button id="plan-zoom" class="plan-button" data-full="assets/plan0.webp" data-caption="Planta baja · Sin escala" aria-label="Ampliar plano de planta baja"><img id="floor-image" src="assets/plan0.webp" width="495" height="1035" loading="lazy" alt="Distribución de planta baja"><span>AMPLIAR PLANO ↗</span></button><p>Plano de distribución · Sin escala</p></div></div>
+    </section>
+
+    <section class="location section-wrap" id="ubicacion">
+      <div class="section-kicker"><span>UBICACIÓN</span><span>DE LA VERBENA · CUENCA</span></div>
+      <div class="location-grid"><div><h2>CONECTADO<br>CON TU<br><em>DÍA A DÍA.</em></h2><p>Conexión desde la Av. de las Américas por la Av. del Tejar, hasta De la Verbena.</p><div class="route-stats"><div><strong>550 <small>m</small></strong><span>RUTA DE REFERENCIA</span></div><div><strong>10 <small>min</small></strong><span>A PIE</span></div></div><p class="route-note">Desde el entorno de Supermaxi Las Américas, según la captura de Google Maps aportada para el proyecto. El tiempo puede variar.</p><div class="nearby"><span>Supermercado</span><span>Comercios y gastronomía</span><span>Paradas de bus</span><span>Servicios del sector</span></div><a class="button button-outline" href="https://maps.app.goo.gl/UJPPq1xdzt7FHiBy8" target="_blank" rel="noopener">Abrir Google Maps <span aria-hidden="true">↗</span></a></div>
+      <div class="map-card"><svg viewBox="0 0 500 620" role="img" aria-labelledby="map-title map-desc"><title id="map-title">Acceso a Tribecca</title><desc id="map-desc">Croquis referencial desde Av. de las Américas, por Av. del Tejar y De la Verbena, hasta Tribecca. Sin escala.</desc><g class="map-secondary" fill="none" stroke-width="1.5"><path d="M35 586L160 570L245 540M20 482L145 495L205 520M25 188L145 235L261 275L380 291L475 317M110 25L100 80L60 110L90 135L245 125M340 20L354 87L398 132L475 112M95 565L115 376L151 299L260 275M258 401L435 405L480 377M258 212L410 209L470 235"/></g><g class="map-main" fill="none" stroke-linecap="round"><path d="M25 394L140 423L241 465L346 505" stroke-width="5"/><path d="M225 80L240 110L250 151L257 211L261 275L260 403L244 448L241 465" stroke-width="5"/><path d="M258 604L285 559L316 526L346 505L417 479L480 448" stroke-width="8"/></g><path class="map-route" d="M346 505L300 486L241 465L244 448L260 403L261 275L257 211L250 151L240 110L225 80" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="225" cy="80" r="8" class="map-pin"/><circle cx="346" cy="505" r="6" class="map-pin"/><g class="map-labels"><text x="246" y="78" class="map-brand">TRIBECCA</text><text x="124" y="194">De la Verbena</text><text x="45" y="390">Av. del Tejar</text><text x="294" y="590">Av. de las Américas</text><text x="154" y="537">SUPERMAXI</text><text x="154" y="555">LAS AMÉRICAS</text><text x="327" y="395" class="map-small">PARADAS DE BUS</text><text x="345" y="235" class="map-small">GASTRONOMÍA</text><text x="45" y="55">N ↑</text></g></svg><span class="map-note">CROQUIS REFERENCIAL · SIN ESCALA</span></div></div>
+    </section>
+
+    <section class="evening"><img src="assets/night.webp" width="1920" height="1080" loading="lazy" alt="Tribecca al atardecer, con iluminación en balcones y accesos"><div class="evening-copy"><span>EL MISMO LUGAR. OTRA LUZ.</span><h2>AL CAER<br>LA TARDE.</h2></div></section>
+
+    <section class="contact section-wrap" id="contacto"><div class="section-kicker"><span>CONOCE TRIBECCA</span><span>CASAS & SUITES</span></div><div class="contact-grid"><h2>TU PRÓXIMO<br>ESPACIO<br><em>TE ESPERA.</em></h2><div class="contact-copy"><p>Solicita disponibilidad y agenda una presentación del proyecto.</p><a class="button" href="https://wa.me/593984291918?text=Hola%20Ra%C3%BAl%2C%20quisiera%20conocer%20Tribecca%20y%20agendar%20una%20visita." target="_blank" rel="noopener">Conversemos por WhatsApp <span aria-hidden="true">↗</span></a><div class="agent"><span>RAÚL GARCÍA</span><a href="tel:+593984291918">+593 98 429 1918</a></div></div></div></section>
+  </main>
+  <footer class="footer"><a href="#inicio" class="footer-brand">TRIBECCA</a><p>De la Verbena · Cuenca, Ecuador</p><p class="disclaimer">Renders referenciales. Mobiliario y ambientación ilustrativos.</p><a href="#inicio" aria-label="Volver al inicio">VOLVER ARRIBA ↑</a></footer>
+  <a class="floating-contact" href="https://wa.me/593984291918?text=Hola%20Ra%C3%BAl%2C%20quiero%20informaci%C3%B3n%20de%20Tribecca." target="_blank" rel="noopener" aria-label="Consultar sobre Tribecca por WhatsApp"><span aria-hidden="true">↗</span><span>Hablemos</span></a>
+  <dialog id="lightbox" aria-label="Vista ampliada del proyecto"><button class="lightbox-close" autofocus aria-label="Cerrar imagen">Cerrar ×</button><img id="lightbox-image" alt=""><p id="lightbox-caption"></p></dialog>
+</body>
+</html>
