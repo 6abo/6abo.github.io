@@ -86,7 +86,7 @@ window.matchMedia('(min-width:701px)').addEventListener('change', event => { if 
 const floors = [
   { name: 'Planta baja', items: ['Sala y comedor', 'Cocina', 'Baño social', 'Área exterior'] },
   { name: 'Primera planta alta', items: ['Dos dormitorios', 'Baño', 'Circulación y escalera'] },
-  { name: 'Segunda planta alta', items: ['Un dormitorio', 'Baño', 'Espacio construido de piso gris', 'Llegada de escalera'] }
+  { name: 'Segunda planta alta', items: ['Un dormitorio', 'Baño', 'Pérgola abierta e hidromasaje', 'Llegada de escalera'] }
 ];
 const tabs = [...document.querySelectorAll('[data-floor]')];
 const floorImage = document.getElementById('floor-image');
@@ -169,3 +169,5 @@ document.querySelectorAll('[data-filter]').forEach(button => {
     document.getElementById('gallery-status').textContent = `${count} imágenes del proyecto`;
   });
 });
+
+document.querySelector('[data-jump-floor]')?.addEventListener('click', () => selectFloor(2));

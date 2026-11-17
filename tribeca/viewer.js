@@ -20,9 +20,9 @@ const roomData = [
   ],
   [
     { name: 'Dormitorio', point: [-1.3, 1.5], photo: 'bedroom3', description: 'Dormitorio de la segunda planta alta, conectado con la circulación y el baño.' },
-    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead2-wall', description: 'Baño en la segunda planta alta, según la distribución aportada.' },
-    { name: 'Espacio construido', point: [1.1, -5.5], photo: 'overhead2-wall', description: 'Recinto construido de piso gris, incorporado según la imagen superior y la aclaración del proyecto. Uso no especificado.' },
-    { name: 'Circulación y escalera', point: [2.2, 0.3], photo: 'overhead2-wall', description: 'Llegada de la escalera desde la primera planta alta. No se añade una subida hacia un cuarto nivel.' }
+    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead2-pergola', description: 'Baño en la segunda planta alta, según la distribución aportada.' },
+    { name: 'Pérgola e hidromasaje', point: [1.1, -5.5], photo: 'terrace-spa', description: 'Terraza abierta de la tercera planta con pérgola de listones, hidromasaje y área de descanso. Render de la ambientación propuesta.' },
+    { name: 'Circulación y escalera', point: [2.2, 0.3], photo: 'overhead2-pergola', description: 'Llegada de la escalera desde la primera planta alta. No se añade una subida hacia un cuarto nivel.' }
   ]
 ];
 let selectedFloor = 0;
@@ -35,7 +35,7 @@ let stageVisible = false;
 
 function updateFlatView() {
   const renderMode = mode === 'render';
-  floorImage.src = renderMode && selectedFloor > 0 ? `assets/overhead${selectedFloor}-wall.webp` : `assets/${renderMode ? 'overhead' : 'plan'}${selectedFloor}.webp`;
+  floorImage.src = renderMode && selectedFloor === 2 ? 'assets/overhead2-pergola.webp' : renderMode && selectedFloor === 1 ? 'assets/overhead1-wall.webp' : `assets/${renderMode ? 'overhead' : 'plan'}${selectedFloor}.webp`;
   floorImage.alt = `${renderMode ? 'Render superior' : 'Plano'} de ${floorNames[selectedFloor].toLowerCase()}`;
   planZoom.dataset.full = floorImage.getAttribute('src');
   planZoom.dataset.caption = `${floorNames[selectedFloor]} · ${renderMode ? 'Render superior' : 'Sin escala'}`;
@@ -164,6 +164,7 @@ async function buildViewer() {
   const LEVEL = 3.2;
   const brick = material('#b77e58');
   const concrete = material('#777776');
+  const water = material('#61bfc5', {roughness:0.17,metalness:0.15});
   function block(parent, x, y, z, width, height, depth, mat) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), mat);
     mesh.position.set(x, y + height / 2, z);
@@ -249,6 +250,27 @@ async function buildViewer() {
       rect(parent,397,end-(i+1)*run,499,end-(i+1)*run+1.5,darkWood,0.012,0.19+i*(LEVEL-0.1)/(count-1));
     }
   }
+  function terrace(parent) {
+    // Rear third-floor footprint retained; only its enclosure/use changes.
+    rect(parent,182,12,498,386,concrete,0.035,0.085);
+    // White spa rim around a recessed turquoise water surface.
+    rect(parent,340,63,480,228,wood,0.62);
+    rect(parent,340,63,480,76,marble,0.18,0.70);
+    rect(parent,340,215,480,228,marble,0.18,0.70);
+    rect(parent,340,76,352,215,marble,0.18,0.70);
+    rect(parent,468,76,480,215,marble,0.18,0.70);
+    rect(parent,352,76,468,215,water,0.025,0.76);
+    for(const x of [366,450]) rect(parent,x,74,x+15,90,charcoal,0.08,0.88);
+    // Open pergola: four posts, perimeter beams and spaced timber slats.
+    for(const x of [190,488]) for(const y of [20,278]) rect(parent,x,y,x+8,y+8,wood,2.75);
+    rect(parent,188,18,500,27,wood,0.16,2.72);
+    rect(parent,188,278,500,287,wood,0.16,2.72);
+    rect(parent,188,18,197,287,wood,0.16,2.72);
+    rect(parent,491,18,500,287,wood,0.16,2.72);
+    for(let y=29;y<278;y+=20) rect(parent,190,y,498,y+6,wood,0.10,2.88);
+    chair(parent,px(239),pz(329),-0.25);chair(parent,px(324),pz(329),0.25);
+    plant(parent,px(230),pz(100));plant(parent,px(460),pz(335));
+  }
   for (let index=0; index<3; index++) {
     const group = new THREE.Group(); scene.add(group); models.push(group);
     const walls = new THREE.Group(); group.add(walls); wallGroups.push(walls);
@@ -315,9 +337,10 @@ async function buildViewer() {
         rect(group,182,12,498,78,paleWood,0.64); // rear wardrobe
         planBed(group,273,145,493,269,true);
       } else {
-        [[170,0,510,12],[170,0,182,386],[498,0,510,386],
-         [170,386,295,398],[397,386,510,398]].forEach(r=>partition(walls,...r));
+        [[170,0,510,12],[170,0,182,386],[498,0,510,386]].forEach(r=>partition(walls,...r,ivory,1));
+        [[170,386,295,398],[397,386,510,398]].forEach(r=>partition(walls,...r));
         windowStrip(walls,295,387,397,397);
+        terrace(group);
       }
     }
   }
@@ -338,10 +361,11 @@ async function buildViewer() {
       rect(shell,295,840,397,850,wood,2.8);
       rect(shell,295,839,397,851,ivory,0.32,2.88);
     } else {
-      [[0,386,12,941],[0,386,170,398],[170,0,182,386],
-       [170,0,510,12],[498,0,510,550],[498,800,510,851],[386,839,397,941],
+      [[0,386,12,941],[0,386,170,398],
+       [498,386,510,550],[498,800,510,851],[386,839,397,941],
        [397,839,431,851],[476,839,510,851]]
         .forEach(r=>partition(shell,...r,ivory,LEVEL));
+      [[170,0,182,386],[170,0,510,12],[498,0,510,386]].forEach(r=>partition(shell,...r,ivory,i===2 ? 1 : LEVEL));
       rect(shell,498,550,503,800,charcoal,2.6,0.28);
       rect(shell,503,552,505,798,glass,2.5,0.33);
       facadeWindow(shell,431,840,476,851,0.28,2.6);
@@ -368,12 +392,10 @@ async function buildViewer() {
     if(i===2) {
       rect(shell,0,386,397,946,ivory,0.22,LEVEL);
       rect(shell,397,386,510,851,ivory,0.22,LEVEL);
-      rect(shell,170,0,510,386,ivory,0.22,LEVEL);
     }
     if(i===2) {
       rect(shell,0,386,397,941,ivory,0.18,LEVEL);
       rect(shell,397,386,510,851,ivory,0.18,LEVEL);
-      rect(shell,170,0,510,386,concrete,0.18,LEVEL);
     }
     shell.visible=false;
   }
@@ -420,7 +442,7 @@ async function buildViewer() {
   function animate() {
     activeFrame = 0;
     if (!visible || stage.hidden) return;
-    if (controls.update()) draw();
+    controls.update();
     activeFrame = requestAnimationFrame(animate);
   }
   function startAnimation() {
@@ -469,6 +491,9 @@ async function buildViewer() {
     if (event.target !== stage || !actions[event.key]) return;
     event.preventDefault();document.querySelector(`[data-camera="${actions[event.key]}"]`).click();
   });
+  // OrbitControls updates on pointer/wheel events. Its second update in the
+  // animation loop can return false, so rendering must follow its change event.
+  controls.addEventListener('change', draw);
   new ResizeObserver(size).observe(stage);
   renderer.domElement.addEventListener('webglcontextlost', event => {
     event.preventDefault();setMode('render');document.getElementById('viewer-instructions').textContent = 'El visor se pausó. Puedes seguir explorando el render y el plano.';
