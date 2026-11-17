@@ -20,9 +20,9 @@ const roomData = [
   ],
   [
     { name: 'Dormitorio', point: [-1.3, 1.5], photo: 'bedroom3', description: 'Dormitorio de la segunda planta alta, conectado con la circulación y el baño.' },
-    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead2-pergola', description: 'Baño en la segunda planta alta, según la distribución aportada.' },
+    { name: 'Baño', point: [-1.3, -2.1], photo: 'overhead2-open', description: 'Baño en la segunda planta alta, según la distribución aportada.' },
     { name: 'Pérgola e hidromasaje', point: [1.1, -5.5], photo: 'terrace-spa', description: 'Terraza abierta de la tercera planta con pérgola de listones, hidromasaje y área de descanso. Render de la ambientación propuesta.' },
-    { name: 'Circulación y escalera', point: [2.2, 0.3], photo: 'overhead2-pergola', description: 'Llegada de la escalera desde la primera planta alta. No se añade una subida hacia un cuarto nivel.' }
+    { name: 'Circulación y escalera', point: [2.2, 0.3], photo: 'overhead2-open', description: 'Llegada de la escalera desde la primera planta alta. No se añade una subida hacia un cuarto nivel.' }
   ]
 ];
 let selectedFloor = 0;
@@ -35,7 +35,7 @@ let stageVisible = false;
 
 function updateFlatView() {
   const renderMode = mode === 'render';
-  floorImage.src = renderMode && selectedFloor === 2 ? 'assets/overhead2-pergola.webp' : renderMode && selectedFloor === 1 ? 'assets/overhead1-wall.webp' : `assets/${renderMode ? 'overhead' : 'plan'}${selectedFloor}.webp`;
+  floorImage.src = renderMode && selectedFloor === 2 ? 'assets/overhead2-open.webp' : renderMode && selectedFloor === 1 ? 'assets/overhead1-wall.webp' : `assets/${renderMode ? 'overhead' : 'plan'}${selectedFloor}.webp`;
   floorImage.alt = `${renderMode ? 'Render superior' : 'Plano'} de ${floorNames[selectedFloor].toLowerCase()}`;
   planZoom.dataset.full = floorImage.getAttribute('src');
   planZoom.dataset.caption = `${floorNames[selectedFloor]} · ${renderMode ? 'Render superior' : 'Sin escala'}`;
@@ -311,7 +311,7 @@ async function buildViewer() {
       rect(group,170,0,510,386,index===2 ? concrete : paleWood,0.2,-0.12);
       rect(group,12,544,284,611,paleWood,0.52); // built-in wardrobe
       [[0,386,103,398],[170,386,302,398],[0,386,12,941],
-       [12,533,295,545],[284,477,296,612],[284,709,296,929],
+       [12,533,295,545],[284,477,296,612],
        [386,839,397,941],[397,839,431,851],[476,839,510,851],
        [498,386,510,851]]
         .forEach(r=>partition(walls,...r));
@@ -327,8 +327,11 @@ async function buildViewer() {
         rect(group,397,386,498,403,paleWood,0.04);
       }
       // Front bedroom partition and inward-opening door, traced from plan.
-      const door = rect(group,205,701,284,706,wood,1.1);
-      door.userData.role = 'front-bedroom-door';
+      if(index===1) {
+        partition(walls,284,709,296,929);
+        const door = rect(group,205,701,284,706,wood,1.1);
+        door.userData.role = 'front-bedroom-door';
+      }
       planBed(group,61,759-(index===2?51:0),238,882-(index===2?51:0));
       if(index===1) {
         [[170,0,510,12],[170,0,182,159],[498,0,510,386],
