@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base target="_top">
+<title>RG Inmobiliaria | Cuenca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#252222;--wine:#6e282c;--paper:#f7f4ef;--line:#ded5cb;--muted:#675e59;--gold:#c2a483}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:500 14px/1.6 Montserrat,Arial,sans-serif}button,input,select,textarea{font:inherit}button,a,input,select,textarea{touch-action:manipulation}a{color:var(--wine)}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #b47749;outline-offset:3px}.wrap{width:min(1190px,calc(100% - 48px));margin:auto}
+header{background:var(--paper);border-bottom:1px solid var(--line)}nav{height:83px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);font-weight:800;line-height:1.25}.monogram{display:grid;place-items:center;border:1px solid currentColor;width:45px;height:45px;font-family:Georgia,serif;font-size:24px;letter-spacing:-3px;padding-right:3px;color:var(--wine)}.brand small{display:block;font-size:9px;letter-spacing:.16em;font-weight:600;margin-top:4px}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid var(--wine);border-radius:4px;background:var(--wine);color:white;padding:11px 17px;font-weight:700;text-decoration:none}.outline{background:transparent;color:var(--wine)}.quiet{background:transparent;color:var(--ink);border:1px solid var(--line)}.hero{background:linear-gradient(109deg,#271c20,#4f2026 65%,#612f31);color:var(--paper);overflow:hidden}.hero .wrap{position:relative;min-height:370px;display:flex;align-items:center;padding:52px 0 67px}.hero-text{z-index:1;max-width:710px}.location{display:flex;align-items:center;gap:10px;color:#edceac;letter-spacing:.19em;text-transform:uppercase;font-size:11px;font-weight:700}.location:before{content:'';width:25px;height:1px;background:var(--gold)}h1{font-size:clamp(36px,6.1vw,77px);line-height:1.04;letter-spacing:-.065em;margin:14px 0 17px;font-weight:700}h1 em{color:#e1bc99;font-style:normal}.hero p{margin:0;max-width:460px;color:#f4e3dc}.facade{position:absolute;width:43%;height:88%;right:0;bottom:-17%;transform:skewY(-15deg);opacity:.33;background:repeating-linear-gradient(90deg,transparent 0 55px,#cfad89 56px 57px),repeating-linear-gradient(0deg,transparent 0 48px,#cfad89 49px 50px);border:1px solid #cfad89;mask-image:linear-gradient(90deg,transparent,#000 33%)}
+.filters{position:relative;background:#fffdfa;border:1px solid var(--line);margin-top:-31px;display:grid;grid-template-columns:2fr 1fr 1fr;box-shadow:0 12px 28px #32232212;padding:17px;gap:12px;border-radius:6px}.filters label,.form label{display:grid;gap:5px;font-size:12px;font-weight:700}input,select,textarea{width:100%;min-width:0;border:1px solid var(--line);border-radius:4px;padding:10px;background:white;color:var(--ink)}textarea{min-height:86px;resize:vertical}.section-title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:34px 0 16px}.section-title h2{margin:0;font-size:clamp(23px,4vw,34px);letter-spacing:-.04em}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;min-height:180px}.card{background:#fffdfa;border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column}.photo{aspect-ratio:1.48;background:linear-gradient(120deg,#d9cdc1,#b69d8d);width:100%;object-fit:cover;display:block}.card-body{padding:17px;display:flex;flex-direction:column;flex:1}.card h3{margin:5px 0;font-size:18px;line-height:1.28;letter-spacing:-.025em}.tag{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--wine)}.price{font-size:22px;font-weight:800;letter-spacing:-.05em}.facts{margin:12px 0;padding:9px 0;border-block:1px solid var(--line);color:var(--muted);font-size:12px}.card .btn{margin-top:auto}.empty{grid-column:1/-1;padding:24px;border:1px dashed var(--line);align-self:start}.demo{font-size:12px;color:var(--muted);margin:12px 0 0}footer{margin-top:62px;border-top:1px solid var(--line);padding:26px 0;color:var(--muted)}
+dialog{width:min(820px,calc(100% - 30px));max-height:90vh;border:1px solid var(--line);border-radius:8px;padding:0;background:var(--paper);color:var(--ink)}dialog::backdrop{background:#21171ad0}dialog header{position:sticky;top:0;z-index:2;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}dialog h2{margin:0}dialog .body{padding:20px}.form{display:grid;gap:11px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tabs{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0}.row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--line);padding:12px 0}.row > div:first-child{flex:1;min-width:145px}.checks{display:flex;gap:10px;flex-wrap:wrap}.checks label{display:flex;align-items:center;gap:4px}.checks input{width:auto}.error{color:#922331;font-weight:700}.success{color:#355a42;font-weight:700}.detail-image{max-height:440px;object-fit:contain}.status{min-height:21px}.intro{position:fixed;inset:0;z-index:10;background:#311e24;color:#e9c7a7;display:grid;place-content:center;text-align:center;pointer-events:none;animation:leave 1.05s .45s both}.intro .monogram{color:inherit;width:96px;height:96px;font-size:51px;margin:auto;animation:reveal .65s both}.intro span{letter-spacing:.24em;font-size:10px;margin-top:14px}@keyframes reveal{from{opacity:0;transform:translateY(14px) scale(.87)}to{opacity:1;transform:none}}@keyframes leave{0%,55%{opacity:1}100%{opacity:0;visibility:hidden}}
+@media(max-width:870px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:565px){.wrap{width:calc(100% - 28px)}nav{height:68px}.hero .wrap{min-height:320px}.filters{grid-template-columns:1fr 1fr}.filters label:first-child{grid-column:1/-1}.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.facade{width:70%;opacity:.16}.btn{padding:8px 11px}}
+@media(prefers-reduced-motion:reduce){.intro{display:none}}
+</style>
+</head>
+<body>
+<div class="intro" aria-hidden="true"><div class="monogram">RG</div><span>INMOBILIARIA</span></div>
+<header><nav class="wrap"><a class="brand" href="#inicio" target="_self"><span class="monogram" aria-hidden="true">RG</span><span>RG INMOBILIARIA<small>CONSTRUCTORA · CUENCA</small></span></a><button class="btn outline" id="team">Área del equipo</button></nav></header>
+<main id="inicio">
+<section class="hero"><div class="wrap"><div class="hero-text"><div class="location">Cuenca, Ecuador</div><h1>Tu próximo lugar<br><em>está en Cuenca.</em></h1><p>Explora propiedades en venta y coordina tu visita con un asesor de RG.</p></div><div class="facade" aria-hidden="true"></div></div></section>
+<div class="wrap">
+<section class="filters" aria-label="Filtros de propiedades">
+<label>Buscar<input id="search" type="search" placeholder="Sector, propiedad o característica"></label>
+<label>Tipo de propiedad<select id="category"><option value="">Todas las categorías</option></select></label>
+<label>Presupuesto<select id="budget"><option value="">Cualquier presupuesto</option><option value="60000">Hasta $60.000</option><option value="110000">Hasta $110.000</option><option value="200000">Hasta $200.000</option><option value="plus">Más de $200.000</option></select></label>
+</section>
+<section aria-labelledby="heading"><div class="section-title"><h2 id="heading">Propiedades en venta</h2><span id="count" class="muted" aria-live="polite"></span></div><div id="cards" class="grid"></div><p id="demo" class="demo" hidden>Vista previa con propiedades e imágenes de ejemplo.</p></section>
+</div></main>
+<footer><div class="wrap">RG Inmobiliaria Constructora · Cuenca, Ecuador</div></footer>
+<dialog id="detail" aria-labelledby="detailTitle"><header><h2 id="detailTitle">Propiedad</h2><button class="btn quiet close" aria-label="Cerrar ficha">✕</button></header><div class="body"></div></dialog>
+<dialog id="office" aria-labelledby="officeTitle"><header><h2 id="officeTitle">Área del equipo</h2><button class="btn quiet close" aria-label="Cerrar área del equipo">✕</button></header><div class="body" id="officeBody"></div></dialog>
+<script>
+const $ = id => document.getElementById(id);
+const types = ['Casas Crédito VIP','Crédito Miti Miti','Casa Rentera','Preventa','Departamentos','Casas','Terrenos'];
+const labels = {publicar:'Publicaciones',agenda:'Agenda',limpieza:'Limpieza',cumpleanos:'Cumpleaños'};
+const demo = !window.google?.script?.run;
+const sample = [{"id": "RG-1", "titulo": "Casa Rentera con Local Comercial en Av. Las Américas", "categoria": "Casa Rentera", "ubicacion": "Av. Las Américas", "precio": 185000, "area": 320, "habitaciones": 8, "imagen": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=90", "fotos": 1, "descripcion": "Ficha de ejemplo para visualizar el catálogo."}, {"id": "RG-2", "titulo": "Moderna Residencia con Crédito VIP y Jardín", "categoria": "Casas Crédito VIP", "ubicacion": "San Joaquín", "precio": 89000, "area": 145, "habitaciones": 3, "imagen": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=90", "fotos": 1, "descripcion": "Ficha de ejemplo para visualizar el catálogo."}, {"id": "RG-3", "titulo": "Proyecto en Preventa Condominio Altos del Río", "categoria": "Preventa", "ubicacion": "Challuabamba", "precio": 74500, "area": 95, "habitaciones": 2, "imagen": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=90", "fotos": 1, "descripcion": "Ficha de ejemplo para visualizar el catálogo."}];
+let catalog = [], access = '', team, requestId;
+const photos = new Map();
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const currency = n => '$' + new Intl.NumberFormat('es-EC',{maximumFractionDigits:2}).format(n);
+const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const options = values => values.map(v => '<option>' + esc(v) + '</option>').join('');
+const call = (action, data = {}) => new Promise((resolve,reject) => {
+  if (demo) {
+    if (action === 'catalogo') return resolve(sample);
+    return reject(new Error('Conecta el proyecto a Apps Script para utilizar el área del equipo.'));
+  }
+  google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).rpc(action,data,access);
+});
+const msg = (node, text, error = false) => {
+  node.className = 'status ' + (error ? 'error' : 'success');
+  node.textContent = text;
+};
+const values = form => Object.fromEntries(new FormData(form));
+const facts = p => [p.habitaciones == null ? '' : p.habitaciones + ' hab.', p.area + ' m²', p.parqueadero == null ? '' : p.parqueadero ? p.parqueadero + ' parqueader' + (p.parqueadero === 1 ? 'o' : 'os') : 'Sin parqueadero'].filter(Boolean).join(' · ');
+
+async function showPhoto(img, p, index) {
+  if (p.imagen) { img.src = p.imagen; return; }
+  const key = p.id + '/' + index;
+  if (!photos.has(key)) photos.set(key, call('foto',{id:p.id,index}).catch(error => {photos.delete(key); throw error;}));
+  try { img.src = await photos.get(key); }
+  catch { img.alt = 'Foto temporalmente no disponible'; }
+}
+
+const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+  entries.filter(e => e.isIntersecting).forEach(({target}) => {
+    observer.unobserve(target);
+    const p = catalog.find(item => item.id === target.dataset.photo);
+    if (p) showPhoto(target,p,0);
+  });
+},{rootMargin:'180px'}) : null;
+
+function render() {
+  const query = normalize($('search').value.trim());
+  const category = $('category').value;
+  const budget = $('budget').value;
+  const filtered = catalog.filter(p => (!category || p.categoria === category) &&
+    (!budget || (budget === 'plus' ? p.precio > 200000 : p.precio <= Number(budget))) &&
+    normalize([p.titulo,p.ubicacion,p.categoria,p.descripcion,p.agente].join(' ')).includes(query));
+  $('count').textContent = filtered.length + (filtered.length === 1 ? ' inmueble' : ' inmuebles');
+  observer?.disconnect();
+  $('cards').innerHTML = filtered.map(p => `
+  <article class="card"><img class="photo" alt="${esc(p.titulo)}" data-photo="${esc(p.id)}" decoding="async"><div class="card-body">
+    <span class="tag">${esc(p.categoria)}</span><h3>${esc(p.titulo)}</h3><span class="muted">${esc(p.ubicacion)}</span>
+    <div class="price">${currency(p.precio)}</div><p class="facts">${esc(facts(p))}</p><button class="btn outline" data-listing="${esc(p.id)}">Ver propiedad</button>
+  </div></article>`).join('') || '<p class="empty">Por ahora no hay propiedades que coincidan con tu búsqueda.</p>';
+  $('cards').querySelectorAll('[data-photo]').forEach(img => observer ? observer.observe(img) : showPhoto(img,catalog.find(p => p.id === img.dataset.photo),0));
+}
+
+async function refresh() {
+  catalog = await call('catalogo');
+  render();
+}
+
+function detail(p) {
+  const dialog = $('detail');
+  const body = dialog.querySelector('.body');
+  $('detailTitle').textContent = p.titulo;
+  const href = p.telefono && 'https://wa.me/' + p.telefono + '?text=' + encodeURIComponent('Hola, quisiera agendar una visita para ' + p.titulo + '.');
+  body.innerHTML = `<div id="gallery"></div><div class="tabs" aria-label="Galería">
+  ${Array.from({length:p.fotos},(_,i) => `<button class="btn quiet" data-index="${i}" aria-label="Foto ${i+1}">${i+1}</button>`).join('')}</div>
+  <div class="tag">${esc(p.ubicacion)}</div><div class="price">${currency(p.precio)}</div><p class="facts">${esc(facts(p))}</p>
+  <p style="white-space:pre-wrap">${esc(p.descripcion)}</p>${href ? `<a class="btn" href="${esc(href)}" target="_blank" rel="noopener">Agendar visita por WhatsApp</a>` : ''}`;
+  function select(i) {
+    body.querySelectorAll('[data-index]').forEach(btn => btn.setAttribute('aria-pressed', String(Number(btn.dataset.index) === i)));
+    const img = document.createElement('img');
+    img.className = 'photo detail-image';
+    img.alt = p.titulo + ' · Foto ' + (i+1);
+    $('gallery').replaceChildren(img);
+    showPhoto(img,p,i);
+  }
+  body.querySelectorAll('[data-index]').forEach(btn => btn.onclick = () => select(Number(btn.dataset.index)));
+  dialog.showModal();
+  select(0);
+}
+
+function permissions(selected = []) {
+  return '<div class="checks">' + Object.entries(labels).map(([key,label]) =>
+    `<label><input type="checkbox" name="permisos" value="${key}" ${selected.includes(key) ? 'checked' : ''}>${label}</label>`).join('') + '</div>';
+}
+function bindForm(form, callback, status) {
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const button = e.submitter || form.querySelector('button[type=submit]');
+    if (button) button.disabled = true;
+    msg(status,'Procesando…');
+    try { await callback(form); }
+    catch (error) { msg(status,error.message || 'No se pudo completar la operación.',true); }
+    finally { if (button) button.disabled = false; }
+  };
+}
+function login() {
+  $('officeBody').innerHTML = demo
+    ? '<p>Vista previa del catálogo. El acceso de Christian y los permisos del equipo se activan al desplegar el proyecto con Apps Script.</p>'
+    : '<form id="login" class="form"><label>Clave personal<input name="key" type="password" maxlength="64" required autocomplete="current-password"></label><button class="btn" type="submit">Ingresar</button><div id="loginStatus" class="status" role="status"></div></form>';
+  if (demo) return;
+  bindForm($('login'),async form => {
+    access = values(form).key.trim();
+    try { await openTeam(); } catch (error) { access = ''; throw error; }
+  },$('loginStatus'));
+}
+async function openTeam(tab) {
+  team = await call('equipo');
+  const tabs = Object.keys(labels);
+  if (team.user.admin) tabs.push('personas');
+  const selected = tabs.includes(tab) ? tab : tabs[0];
+  $('officeBody').innerHTML = `<div class="row"><div><strong>${esc(team.user.nombre)}</strong> · ${team.user.admin ? 'Administrador' : 'Equipo'}</div><button id="logout" class="btn quiet">Salir</button></div>
+    <nav class="tabs" style="height:auto" aria-label="Herramientas del equipo">${tabs.map(t => `<button class="btn ${t === selected ? '' : 'outline'}" aria-pressed="${t === selected}" data-tab="${t}">${labels[t] || 'Personas y permisos'}</button>`).join('')}</nav>
+    <div id="pane"></div><div id="teamStatus" class="status" role="status"></div>`;
+  $('logout').onclick = () => { access = ''; team = null; requestId = null; login(); };
+  $('officeBody').querySelectorAll('[data-tab]').forEach(btn => btn.onclick = () => {
+    openTeam(btn.dataset.tab).catch(error => msg($('teamStatus'),error.message,true));
+  });
+  if (selected === 'personas') renderMembers();
+  else if (selected === 'publicar') renderPublish();
+  else renderTasks(selected);
+}
+
+function renderMembers() {
+  $('pane').innerHTML = `<form id="invite" class="form"><label>Nombre de la persona<input name="nombre" maxlength="80" required></label>${permissions()}<button class="btn" type="submit">Crear acceso</button></form>
+  <div id="invitation"></div><h3>Permisos del equipo</h3>
+  ${team.members.map(m => `<form class="row member" data-id="${esc(m.id)}"><div><label>Nombre<input required name="nombre" value="${esc(m.nombre)}" maxlength="80"></label></div>${permissions(m.permisos)}<button class="btn" type="submit">Guardar</button><button class="btn quiet revoke" type="button">Revocar</button></form>`).join('') || '<p class="muted">Aún no hay personas invitadas.</p>'}`;
+  const status = $('teamStatus');
+  bindForm($('invite'),async form => {
+    const result = await call('miembro',{...values(form),permisos:new FormData(form).getAll('permisos')});
+    await openTeam('personas');
+    $('invitation').innerHTML = '<label>Clave personal. Compártela solo con esta persona.<input readonly></label>';
+    $('invitation').querySelector('input').value = result.key;
+    $('invitation').querySelector('input').select();
+  },status);
+  $('pane').querySelectorAll('.member').forEach(form => {
+    bindForm(form,async () => {
+      await call('miembro',{id:form.dataset.id,...values(form),permisos:new FormData(form).getAll('permisos')});
+      msg(status,'Permisos guardados.');
+    },status);
+    form.querySelector('.revoke').onclick = async () => {
+      if (!confirm('¿Revocar el acceso a esta persona?')) return;
+      try { await call('miembro',{id:form.dataset.id,revocar:true}); await openTeam('personas'); }
+      catch (error) { msg(status,error.message,true); }
+    };
+  });
+}
+
+function renderTasks(type) {
+  const tasks = team.tasks.filter(t => t.tipo === type);
+  const can = team.user.admin || team.user.permisos.includes(type);
+  $('pane').innerHTML = can ? `<form class="form" id="task"><div class="fields">
+  <label>${type === 'limpieza' ? 'Zona de limpieza' : type === 'cumpleanos' ? 'Nombre del cumpleañero' : 'Evento'}
+  ${type === 'limpieza' ? '<select name="titulo"><option>Oficina</option><option>Baño</option></select>' : '<input name="titulo" maxlength="100" required>'}</label>
+  <label>Fecha ${type === 'limpieza' ? '(martes o jueves)' : ''}<input name="fecha" type="date" required></label></div>
+  <label>Responsable<select name="assigned"><option value="">${type === 'limpieza' ? 'Seleccionar responsable' : 'Yo'}</option><option value="admin">Christian Álvarez</option>
+  ${team.members.map(m => `<option value="${esc(m.id)}">${esc(m.nombre)}</option>`).join('')}</select></label>
+  <label>Detalle<input name="detalle" maxlength="250"></label><button class="btn" type="submit">Agregar</button></form>` : '';
+  if (type === 'limpieza') $('pane').insertAdjacentHTML('beforeend',`<p><strong>Multas acumuladas: ${currency(tasks.filter(t => t.estado === 'Multa $1').length)}</strong></p>`);
+  $('pane').insertAdjacentHTML('beforeend',tasks.map(t => `<div class="row"><div><strong>${esc(t.titulo)}</strong> · ${esc(t.fecha)}<br>
+  <span class="muted">${esc(t.responsable)}${t.detalle ? ' · ' + esc(t.detalle) : ''}</span></div>
+  ${can ? `<label>Estado <select data-task="${esc(t.id)}">${['Pendiente','Completada',...(type === 'limpieza' ? ['Multa $1'] : [])].map(s => `<option ${s === t.estado ? 'selected' : ''}>${s}</option>`).join('')}</select></label>` : esc(t.estado)}</div>`).join('') || '<p class="muted">Aún no hay actividades registradas.</p>');
+  const status = $('teamStatus');
+  if (can) bindForm($('task'),async form => {
+    await call('actividad',{...values(form),tipo:type});
+    await openTeam(type);
+  },status);
+  $('pane').querySelectorAll('[data-task]').forEach(select => select.onchange = async () => {
+    select.disabled = true;
+    try { await call('estado',{id:select.dataset.task,estado:select.value}); await openTeam(type); }
+    catch (error) { select.value = team.tasks.find(t => t.id === select.dataset.task).estado; msg(status,error.message,true); }
+    finally { select.disabled = false; }
+  });
+}
+async function jpeg(file) {
+  const source = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = source;
+    await img.decode();
+    const canvas = document.createElement('canvas');
+    const ratio = Math.min(1, 1600 / Math.max(img.width,img.height));
+    canvas.width = Math.max(1,Math.round(img.width * ratio));
+    canvas.height = Math.max(1,Math.round(img.height * ratio));
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    for (const quality of [.86,.72,.55,.38]) {
+      const data = canvas.toDataURL('image/jpeg',quality).split(',')[1];
+      if (data.length <= 900000) return data;
+    }
+    throw new Error('La foto sigue siendo demasiado pesada.');
+  } finally { URL.revokeObjectURL(source); }
+}
+function renderPublish() {
+  const can = team.user.admin || team.user.permisos.includes('publicar');
+  $('pane').innerHTML = can ? `<form class="form" id="publish"><div class="fields">
+  <label>Título<input name="titulo" maxlength="100" required></label><label>Sector<input name="ubicacion" maxlength="100" required></label>
+  <label>Categoría<select name="categoria">${options(types)}</select></label><label>Precio en USD<input name="precio" type="number" min="1" step=".01" required></label>
+  <label>Área en m²<input name="area" type="number" min="1" step=".01" required></label><label>Habitaciones<input name="habitaciones" type="number" min="0" required></label>
+  <label>Parqueaderos<input name="parqueadero" type="number" min="0" required></label><label>WhatsApp con código de país<input name="telefono" type="tel" placeholder="+593…" maxlength="16" required></label>
+  </div><label>Distribución y características<textarea name="descripcion" maxlength="1200" required></textarea></label>
+  <label>Fotos (1 a 8, la primera será la portada)<input id="files" type="file" accept="image/*" multiple required></label>
+  ${team.conectado ? '' : '<p class="error">Falta configurar la carpeta base de Google Drive.</p>'}
+  <button class="btn" type="submit" ${team.conectado ? '' : 'disabled'}>Subir a Drive y publicar</button></form>` : '<p>Solicita el permiso de publicación al administrador.</p>';
+  $('pane').insertAdjacentHTML('beforeend',`<h3>Publicaciones activas</h3>${team.listings.map(p => `<div class="row"><div>${esc(p.titulo)}</div>
+  <a href="${esc(p.drive)}" target="_blank" rel="noopener">Abrir carpeta</a>${can ? `<button class="btn quiet" data-archive="${esc(p.id)}">Archivar</button>` : ''}</div>`).join('') || '<p class="muted">Aún no hay publicaciones.</p>'}`);
+  const status = $('teamStatus');
+  if (can && team.conectado) {
+    $('publish').oninput = () => { requestId = null; };
+    bindForm($('publish'),async form => {
+      const files = Array.from($('files').files);
+      if (!files.length || files.length > 8) throw new Error('Selecciona de 1 a 8 fotos.');
+      const photos = [];
+      for (const file of files) photos.push(await jpeg(file));
+      requestId ||= crypto.randomUUID();
+      await call('publicar',{...values(form),id:requestId,photos});
+      requestId = null;
+      form.reset();
+      const results = await Promise.allSettled([refresh(),openTeam('publicar')]);
+      msg($('teamStatus'),results.some(result => result.status === 'rejected')
+        ? 'La publicación se guardó. Recarga para actualizar la vista.' : 'Publicación creada y fotos guardadas en Drive.');
+    },status);
+  }
+  $('pane').querySelectorAll('[data-archive]').forEach(btn => btn.onclick = async () => {
+    if (!confirm('¿Ocultar este inmueble del catálogo? Su carpeta seguirá disponible en Drive.')) return;
+    btn.disabled = true;
+    try { await call('archivar',{id:btn.dataset.archive}); await Promise.all([refresh(),openTeam('publicar')]); }
+    catch (error) { msg(status,error.message,true); }
+    finally { btn.disabled = false; }
+  });
+}
+
+$('category').insertAdjacentHTML('beforeend',options(types));
+$('demo').hidden = !demo;
+for (const id of ['search','category','budget']) $(id).addEventListener('input',render);
+$('cards').onclick = e => {
+  const id = e.target.closest('[data-listing]')?.dataset.listing;
+  if (id) detail(catalog.find(p => p.id === id));
+};
+$('team').onclick = () => {
+  $('office').showModal();
+  login();
+  if (access) openTeam().catch(() => { access = ''; login(); });
+};
+document.querySelectorAll('.close').forEach(btn => btn.onclick = () => btn.closest('dialog').close());
+refresh().catch(() => { $('cards').innerHTML = '<p class="empty">El catálogo no está disponible en este momento. Vuelve a cargar la página.</p>'; });
+</script>
+</body>
+</html>
