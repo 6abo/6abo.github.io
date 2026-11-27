@@ -2,13 +2,17 @@ import {categories,roles,TZ,isoToday,monthDates,fold} from './model.js'
 import {api,icon,esc,attr,price,quantity,capitalize,monthTitle,dayTitle,shortMonth,media,originalMedia,imageUrl,cls,
   options,avatar,button,iconButton,dataId,empty,loader,dialog,showDialog,notify} from './ui.js'
 import {advertisement} from './photos.js'
-import {loginForm,propertyForm,eventForm,requestForm,birthdayForm,rosterForm,userForm,confirmDelete} from './forms.js'
+import {loginForm,propertyForm,eventForm,requestForm,birthdayForm,rosterForm,userForm,passwordForm,reportForm,sectorForm,confirmDelete} from './forms.js'
+import {locationKey} from './sectors.js'
+import {locationPicker,bindLocationPicker} from './location-picker.js'
+import {weekStart,summarizeListings,sectorsCsv} from './reporting.js'
+import {reportsView} from './reports-view.js'
 
 const root=document.querySelector('#app')
 const pages={
   home:['Panel general','grid'],catalog:['Catálogo','home'],agenda:['Agenda pública','calendar'],
   private:['Mi agenda privada','lock'],birthdays:['Cumpleaños','cake'],cleaning:['Limpieza','broom'],
-  requests:['Requerimientos','inbox'],team:['Usuarios y roles','users']
+  requests:['Requerimientos','inbox'],reports:['Reportes','area'],team:['Usuarios y roles','users']
 }
 const guestPages=['home','catalog','agenda']
 const names=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
@@ -37,6 +41,10 @@ let category=''
 let sort='recent'
 let ownership='all'
 let showFilters=false
+let locationFilter={city:'',sector:'',key:''}
+let socialFilter=''
+let saleFilter=''
+const reportFilters={period:'week',week:weekStart(currentDate),person:'',city:''}
 let maxPrice=''
 let minRooms=''
 let privateExpanded=false
@@ -54,6 +62,8 @@ const find=(route,id)=>routeArray(route).find(item=>item.id===id)
 const propertyPhotos=property=>property.photos?.length?property.photos.map(id=>({id,url:media(id)})):(property.hero?[{url:property.hero}]:[])
 const money=value=>price(value).replace(/\s+(?=\d)/g,'')
 const dateStamp=()=>new Intl.DateTimeFormat('es-EC',{weekday:'long',day:'numeric',month:'long',timeZone:TZ}).format(new Date())
+const socialLabel={allowed:'Autorizada',blocked:'No autorizada',pending:'Por confirmar'}
+const canAdvertise=property=>property?.social==='allowed'
 const roleName=()=>has('admin')?'Administración':has('agent')?'Asesoría inmobiliaria':'Equipo RG'
 
 function page(pageId){
@@ -101,7 +111,7 @@ function navGroup(title,items){
   }).join('')+'</div>'
 }
 function shell(content){
-  const work=['home','catalog','agenda']
+  const work=['home','catalog','agenda','reports']
   const team=['private','birthdays','cleaning','requests',...(has('admin')?['team']:[])]
   return '<div class="shell">'+(mobileMenu?'<button class="mobile-shade" type="button" aria-label="Cerrar navegación" data-action="toggle-menu"></button>':'')+
     '<header class="topbar"><div class="top-brand"><button type="button" class="iconbtn menu-toggle" data-action="toggle-menu" aria-label="Abrir navegación">'+icon('menu')+'</button>'+
@@ -116,15 +126,20 @@ function shell(content){
 }
 
 function render(){
-  const panel={home:dashboard,catalog:catalogPage,agenda:()=>agendaPage(false),private:()=>agendaPage(true),birthdays:birthdaysPage,cleaning:cleaningPage,requests:requestsPage,team:teamPage}[view]
+  const panel={home:dashboard,catalog:catalogPage,agenda:()=>agendaPage(false),private:()=>agendaPage(true),birthdays:birthdaysPage,cleaning:cleaningPage,requests:requestsPage,reports:reportsPage,team:teamPage}[view]
   root.innerHTML=shell(panel())
+  const picker=root.querySelector('[data-location-picker]')
+  if(picker)bindLocationPicker(picker,routeArray('locations'),location=>{
+    locationFilter={...location,city:picker.querySelector('[data-location-city]').value}
+    document.querySelector('#results').innerHTML=resultsContent(view==='catalog')
+  })
   root.setAttribute('aria-busy','false')
   updateAssistant()
 }
 
 function dashboard(){
   const published=routeArray('properties').filter(property=>property.published)
-  const featured=published.find(property=>property.featured)||published[0]
+  const featured=published.find(property=>property.featured&&property.saleStatus!=='sold')||published.find(property=>property.saleStatus!=='sold')
   const title=user()?'¡Bienvenido, '+firstName()+'!':'Panel inmobiliario'
   const tagline=session.demo?'Explora el panel con datos de muestra. Los cambios se guardan en este navegador.':user()?'La confianza se construye en cada visita.':'Gestiona propiedades y consulta la agenda del equipo en Cuenca.'
   const call=has('agent')?button('Nueva captación','new-property','plus','primary'):button('Explorar catálogo','page','search','primary',dataId('catalog'))
@@ -186,10 +201,14 @@ function collectionHeader(full){
 function filterBar(){
   const field=(id,label,value)=>'<label class="field"><span class="small">'+label+'</span><input type="number" min="0" id="'+id+'" value="'+attr(value)+'"></label>'
   return '<div class="filters"><div class="search"><label class="searchbox">'+icon('search')+
-    '<input id="search-input" aria-label="Buscar propiedades" placeholder="Busca por sector, código o asesor" value="'+attr(search)+'"></label>'+
+    '<input id="search-input" aria-label="Buscar propiedades" placeholder="Busca por nombre, código o asesor" value="'+attr(search)+'"></label>'+
     '<select id="sort" aria-label="Ordenar propiedades">'+options([['recent','Más recientes'],['min','Menor precio'],['max','Mayor precio'],['title','Por nombre']],sort)+'</select>'+
     iconButton(showFilters?'Ocultar filtros':'Más filtros','filters','filter','aria-expanded="'+showFilters+'"')+'</div>'+
+    locationPicker({key:'catalog-location',city:locationFilter.city,sector:locationFilter.key?locationFilter.sector:'',selectedKey:locationFilter.key,locations:routeArray('locations')})+
     '<div class="filter-chips" aria-label="Categorías">'+['',...categories].map(value=>'<button type="button" class="'+cls('pill',category===value&&'active')+'" data-action="category" '+dataId(value)+' aria-pressed="'+(category===value)+'">'+esc(value||'Todas')+'</button>').join('')+'</div>'+
+    '<div class="status-filters"><label>Estado de venta<select id="sale-filter">'+
+    options([['available','Disponibles'],['sold','Vendidas']],saleFilter,'Todos los estados')+'</select></label>'+
+    (user()?'<label>Publicación en redes<select id="social-filter">'+options(Object.entries(socialLabel),socialFilter,'Todos los permisos')+'</select></label>':'')+'</div>'+
     (showFilters?'<div class="panel pad fields">'+field('filter-price','Precio máximo en USD',maxPrice)+field('filter-rooms','Dormitorios mínimos',minRooms)+
     (user()?'<label class="field"><span class="small">Visibilidad</span><select id="ownership">'+options([['all','Todas las captaciones visibles'],['mine','Mis captaciones'],['draft','Borradores que gestiono']],ownership)+'</select></label>':'')+
     button('Restablecer filtros','clear-filters',null,'ghost')+'</div>':'')+'</div>'
@@ -199,6 +218,9 @@ function selectedProperties(){
   const rows=routeArray('properties').filter(record=>{
     const hay=fold([record.title,record.category,record.type,record.city,record.sector,record.code,record.author,record.description,record.condition].join(' '))
     return (!category||record.category===category)&&terms.every(term=>hay.includes(term))&&
+      (!locationFilter.city||fold(locationFilter.city)===fold(record.city))&&
+      (!locationFilter.key||locationFilter.key===locationKey(record.city,record.sector))&&
+      (!saleFilter||saleFilter===record.saleStatus)&&(!socialFilter||socialFilter===record.social)&&
       (!maxPrice||(record.price!=null&&record.price<=Number(maxPrice)))&&(!minRooms||(record.bedrooms!=null&&record.bedrooms>=Number(minRooms)))&&
       (ownership==='all'||(ownership==='mine'&&record.ownerId===user()?.id)||(ownership==='draft'&&!record.published&&record.editable))
   })
@@ -220,11 +242,17 @@ function resultsContent(full){
       empty('No hay propiedades con estos filtros.'))
 }
 function propertyTable(items){
-  return '<div class="table-scroll"><table class="activity-table"><thead><tr><th>Propiedad</th><th>Categoría</th><th>Precio</th><th>Asesor</th><th><span class="only-reader">Acciones</span></th></tr></thead><tbody>'+
+  return '<div class="table-scroll"><table class="activity-table"><thead><tr><th>Propiedad</th><th>Categoría</th><th>Estado</th><th>Precio</th><th>Asesor</th><th><span class="only-reader">Acciones</span></th></tr></thead><tbody>'+
     items.map(item=>'<tr><td><button class="table-property" type="button" data-action="property" '+dataId(item.id)+'>'+
     '<span class="table-photo">'+coverMarkup(imageUrl(item))+'</span><span><strong>'+esc(item.title)+'</strong><small>'+esc(item.sector)+'</small></span></button></td>'+
-    '<td><span class="tag '+(item.published?'':'red')+'">'+esc(item.published?item.category:'Borrador')+'</span></td><td><strong>'+esc(money(item.price))+'</strong></td>'+
+    '<td><span class="tag '+(item.published?'':'red')+'">'+esc(item.published?item.category:'Borrador')+'</span></td><td>'+propertyStatus(item)+'</td><td><strong>'+esc(money(item.price))+'</strong></td>'+
     '<td>'+esc(item.author)+'</td><td>'+iconButton('Ver ficha de '+item.title,'property','right',dataId(item.id))+'</td></tr>').join('')+'</tbody></table></div>'
+}
+
+function propertyStatus(property){
+  const sold=property.saleStatus==='sold'
+  return '<div class="tag-list"><span class="tag '+(sold?'red':'green')+'">'+(sold?'Vendida':'Disponible')+'</span>'+
+    (user()?'<span class="tag" title="Permiso para redes">'+esc(socialLabel[property.social]||'Por confirmar')+'</span>':'')+'</div>'
 }
 
 function meta(property){
@@ -238,9 +266,9 @@ function card(property){
   const [id,title,place]=[property.id,property.title,[property.sector,property.city].filter(Boolean).join(' · ')]
   return '<article class="panel card"><button class="card-media" type="button" data-action="property" '+dataId(id)+' aria-label="'+attr(title)+'">'+
     coverMarkup(imageUrl(property))+'<img class="brand-watermark" src="./assets/logo.webp" alt=""><span class="badge">'+esc(property.category)+'</span>'+
-    (property.sample||!property.published?'<span class="sample">'+(property.sample?'Muestra':'Borrador')+'</span>':'')+'</button><div class="card-inner">'+
+    (property.saleStatus==='sold'||property.sample||!property.published?'<span class="sample">'+(property.saleStatus==='sold'?'Vendida':property.sample?'Muestra':'Borrador')+'</span>':'')+'</button><div class="card-inner">'+
     '<button class="card-title" type="button" data-action="property" '+dataId(id)+'>'+esc(title)+'</button><div class="location">'+icon('pin')+esc(place)+'</div>'+
-    '<div class="price">'+esc(money(property.price))+'</div><div class="meta">'+meta(property)+'</div>'+
+    '<div class="price">'+esc(money(property.price))+'</div>'+propertyStatus(property)+'<div class="meta">'+meta(property)+'</div>'+
     '<div class="card-foot"><div class="author">'+avatar(property.author,'',true)+esc(property.author)+'</div>'+
     (property.editable&&has('agent')?button('Editar','edit-property',null,'icon-link',dataId(id)):button('Ver ficha','property',null,'icon-link',dataId(id)))+'</div></div></article>'
 }
@@ -382,13 +410,29 @@ function requestsPage(){
       (record.editable?'<div class="action-row">'+button('Editar','edit-request','edit','',dataId(record.id))+iconButton('Eliminar requerimiento','delete-request','trash',dataId(record.id))+'</div>':'')+'</article>').join('')+'</div>':
       empty('Aún no hay requerimientos.'))
 }
+function reportsPage(){
+  return header('Reportes','Actividad comercial y reportes semanales')+
+    '<div class="reports-layout">'+reportsView({reports:routeArray('reports'),listings:routeArray('statsListings'),
+      team:routeArray('team'),ownerId:user().id,admin:has('admin'),filters:reportFilters})+'</div>'
+}
+function exportReport(){
+  const {week,period,person,city}=reportFilters
+  const {sectors}=summarizeListings(routeArray('statsListings'),{week:period==='week'?week:'',person,city})
+  const url=URL.createObjectURL(new Blob([sectorsCsv(sectors)],{type:'text/csv;charset=utf-8'}))
+  const link=document.createElement('a')
+  link.href=url
+  link.download='rg-captaciones-'+(period==='week'?week:'historico')+'.csv'
+  link.click()
+  setTimeout(()=>URL.revokeObjectURL(url),1000)
+}
+
 function teamPage(){
   const records=routeArray('accounts')
-  return header('Usuarios y roles','Crea cuentas, asigna permisos y activa a los nuevos integrantes.',button('Nueva cuenta','new-user','plus','primary'))+
+  return header('Usuarios y roles','Crea cuentas, asigna permisos y activa a los nuevos integrantes.',button('Agregar sector','new-sector','pin')+button('Nueva cuenta','new-user','plus','primary'))+
     '<section class="panel pad"><div class="widget-head">'+tile('users','Cuentas del equipo')+'</div>'+
     records.map(item=>'<div class="list-row"><div class="flex-left">'+avatar(item.name,item.photo)+'<div><strong>'+esc(item.name)+'</strong><div class="list-meta">'+esc(item.username)+
     '</div><div class="tag-list">'+item.roles.map(role=>'<span class="tag">'+esc(roles[role])+'</span>').join('')+'</div></div></div><div class="action-row">'+
-    '<span class="tag '+(item.active?'green':'')+'">'+(item.active?'Activa':'Inactiva')+'</span>'+iconButton('Editar cuenta','edit-user','edit',dataId(item.id))+'</div></div>').join('')+
+    '<span class="tag '+(item.active?'green':'')+'">'+(item.active?'Activa':'Inactiva')+'</span>'+iconButton('Restablecer contraseña de '+item.name,'reset-password','lock',dataId(item.id))+iconButton('Editar cuenta','edit-user','edit',dataId(item.id))+'</div></div>').join('')+
     '</section>'
 }
 
@@ -408,7 +452,7 @@ function propertyDetail(property,index=0){
     (photos.length>1?'<div class="thumbs">'+photos.map((photo,i)=>'<button type="button" class="thumb '+(i===index?'active':'')+
       '" data-action="gallery" data-index="'+i+'" aria-label="Ver foto '+(i+1)+'"><img src="'+attr(photo.url)+'" alt=""></button>').join('')+'</div>':'')+
     '<div class="detail-title"><div><h2>'+esc(property.title)+'</h2><div class="location">'+icon('pin')+esc(location)+'</div></div><div class="price">'+esc(money(property.price))+'</div></div>'+
-    '<div class="meta">'+meta(property)+'</div><div class="detail-text"><div class="tag-list">'+badges.map(value=>'<span class="tag">'+esc(value)+'</span>').join('')+'</div>'+
+    '<div class="meta">'+meta(property)+'</div>'+propertyStatus(property)+'<div class="detail-text"><div class="tag-list">'+badges.map(value=>'<span class="tag">'+esc(value)+'</span>').join('')+'</div>'+
     (property.description?'<p>'+esc(property.description)+'</p>':'')+
     (property.address&&property.showAddress?'<p>'+icon('pin')+' '+esc(property.address)+'</p>':'')+
     '<div class="author">'+avatar(property.author,'',true)+'Publicado por '+esc(property.author)+'</div>'+
@@ -421,8 +465,11 @@ function propertyDetail(property,index=0){
     '</div><div class="dialog-actions">'+
     (property.mapUrl&&property.showAddress?'<a class="btn" target="_blank" rel="noopener noreferrer" href="'+attr(property.mapUrl)+'">'+icon('pin')+' Mapa</a>':'')+
     (selected?.id&&property.editable?'<a class="btn" download="Foto-original" href="'+attr(originalMedia(selected.id))+'">'+icon('download')+' Foto original</a>':'')+
-    (property.published?button('Compartir ficha','share','share','',dataId(property.id)):'')+
-    button('Crear anuncio','advertisement','sparkle','primary',dataId(property.id))+
+    (property.published&&canAdvertise(property)?button('Compartir ficha','share','share','',dataId(property.id)):'')+
+    (canAdvertise(property)?button('Crear anuncio','advertisement','sparkle','primary',dataId(property.id)):
+      user()?'<span class="small">Anuncio '+(property.social==='blocked'?'no autorizado':'pendiente de autorización')+'</span>':'')+
+    (property.editable&&has('agent')?button(property.saleStatus==='sold'?'Marcar disponible':'Marcar vendida',
+      'toggle-sale','home',property.saleStatus==='sold'?'':'primary',dataId(property.id)):'')+
     (property.editable?(has('agent')?button('Editar','edit-property','edit','',dataId(property.id)):'')+iconButton('Eliminar captación','delete-property','trash',dataId(property.id)):'')+'</div>',{wide:true})
 }
 function eventDetail(event){
@@ -539,6 +586,7 @@ function showShare(url){
   dialog.querySelector('#share-url').select()
 }
 async function showAdvertisement(record){
+  if(!canAdvertise(record))throw Error('Esta ficha requiere autorización para crear un anuncio.')
   const selected=propertyPhotos(record)[activeDocument?.id===record.id?activeDocument.index:0]
   showDialog('Anuncio para redes',loader('Diseñando anuncio…'))
   const current=dialog.querySelector('.loader')
@@ -560,8 +608,10 @@ async function handle(action,id,dataset){
     case 'logout':
       await api('logout',{method:'POST'})
       dialog.close()
-      session={...session,user:null}
+      session=await api('session')
       ownership='all'
+      socialFilter=''
+      reportFilters.person=''
       if(!guestPages.includes(view))view='home'
       readAssistant()
       await refresh()
@@ -574,16 +624,27 @@ async function handle(action,id,dataset){
     case 'filters':showFilters=!showFilters;render();break
     case 'category':category=id;render();break
     case 'open-category':category=id;search='';page('catalog');break
-    case 'clear-filters':search='';category='';sort='recent';ownership='all';maxPrice='';minRooms='';render();break
-    case 'new-property':propertyForm({},user(),has('admin'),()=>complete('Captación guardada.'));break
-    case 'edit-property':propertyForm(find('properties',id),user(),has('admin'),()=>complete('Captación actualizada.'));break
+    case 'clear-filters':search='';category='';sort='recent';ownership='all';maxPrice='';minRooms='';locationFilter={city:'',sector:'',key:''};socialFilter='';saleFilter='';render();break
+    case 'new-property':propertyForm({},user(),has('admin'),routeArray('locations'),()=>complete('Captación guardada.'));break
+    case 'edit-property':propertyForm(find('properties',id),user(),has('admin'),routeArray('locations'),()=>complete('Captación actualizada.'));break
     case 'property':{
       const property=find('properties',id)
       if(property)propertyDetail(property)
       break
     }
     case 'gallery':propertyDetail(find('properties',activeDocument.id),Number(dataset.index));break
-    case 'share':await share(id);break
+    case 'share':
+      if(canAdvertise(find('properties',id)))await share(id)
+      break
+    case 'toggle-sale':{
+      const property=find('properties',id)
+      const status=property.saleStatus==='sold'?'available':'sold'
+      await api('sale-status/'+encodeURIComponent(id),{method:'PUT',data:{status}})
+      const index=activeDocument?.index||0
+      await complete(status==='sold'?'Propiedad marcada como vendida.':'Propiedad disponible nuevamente.')
+      if(dialog.open)propertyDetail(find('properties',id),index)
+      break
+    }
     case 'advertisement':await showAdvertisement(find('properties',id));break
     case 'month':await changeMonth(dataset.kind,Number(dataset.change));break
     case 'day':selectDay(dataset.kind,id);break
@@ -597,6 +658,14 @@ async function handle(action,id,dataset){
     case 'edit-birthday':birthdayForm(find('birthdays',id),routeArray('team'),()=>complete('Cumpleaños actualizado.'));break
     case 'new-roster':rosterForm({},routeArray('team'),()=>complete('Rotación actualizada.'));break
     case 'edit-roster':rosterForm(find('roster',id),routeArray('team'),()=>complete('Rotación actualizada.'));break
+    case 'new-report':reportForm({},reportFilters.week,()=>complete('Reporte guardado.'));break
+    case 'edit-report':reportForm(find('reports',id),reportFilters.week,()=>complete('Reporte actualizado.'));break
+    case 'export-report':exportReport();break
+    case 'new-sector':sectorForm(()=>complete('Sector agregado al directorio.'));break
+    case 'reset-password':passwordForm(find('accounts',id),async()=>{
+      session=await api('session')
+      await complete('Contraseña de prueba restablecida.')
+    });break
     case 'new-user':userForm({},()=>complete('Cuenta guardada.'));break
     case 'edit-user':userForm(find('accounts',id),async()=>{
       const updated=await api('session')
@@ -645,6 +714,16 @@ root.addEventListener('change',async event=>{
   const input=event.target
   if(input.id==='sort')sort=input.value
   else if(input.id==='ownership')ownership=input.value
+  else if(input.id==='sale-filter')saleFilter=input.value
+  else if(input.id==='social-filter')socialFilter=input.value
+  else if(input.id.startsWith('report-')){
+    const key=input.id.slice(7)
+    const value=key==='week'?weekStart(input.value):input.value
+    if(key!=='week'||value)reportFilters[key]=value
+    render()
+    document.getElementById(input.id)?.focus()
+    return
+  }
   else if(input.classList.contains('attendance')){
     input.disabled=true
     try{

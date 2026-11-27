@@ -101,7 +101,7 @@ export async function advertisement(record,photoUrl=imageUrl(record)){
   ctx.drawImage(logo,456,422,168,176)
   ctx.restore()
   ctx.font='700 29px system-ui,sans-serif'
-  const label=record.category
+  const label=record.saleStatus==='sold'?'Vendida · '+record.category:record.category
   const width=ctx.measureText(label).width+59
   round(ctx,1032-width,49,width,54,10,'#fff2f5')
   ctx.fillStyle='#891b37'

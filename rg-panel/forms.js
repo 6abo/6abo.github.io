@@ -1,17 +1,20 @@
 import {categories,types,conditions,services,amenities,benefits,roles,isoToday} from './model.js'
 import {api,attr,esc,button,icon,iconButton,dialog,showDialog,notify,field,selectField,areaField,checkField,checkGroup,fields,section,actions,media,loader,dataId} from './ui.js'
 import {uploadPhoto} from './photos.js'
+import {cities} from './sectors.js'
+import {locationPicker,readLocation,bindLocationPicker} from './location-picker.js'
+import {weekStart} from './reporting.js'
 
 const num=(name,label,value,step='0.01')=>field(name,label,value,{type:'number',extra:'min="0" step="'+step+'"'})
 const local=isoToday
 
-export function loginForm({setup,demo},finish){
+export function loginForm({setup,demo,demoChoices},finish){
   const content='<form class="form" id="signin">'+
     (setup?'<p class="small">Ingresa el código que aparece en la terminal donde iniciaste la aplicación. Define aquí la cuenta administradora.</p>'+field('key','Código de configuración','',{required:true,extra:'autocomplete="off"'})+field('name','Tu nombre','',{required:true}):'')+
     field('username','Usuario','',{required:true,extra:'autocomplete="username" autocapitalize="none"'})+
     field('password','Contraseña','',{required:true,type:'password',extra:'autocomplete="'+(setup?'new-password':'current-password')+'"'})+
     actions(setup?'Activar administración':'Iniciar sesión')+
-    (demo?'<div class="info-box"><strong>Accesos de demostración</strong><p class="small">Usa datos ficticios. Esta versión guarda los cambios en este navegador.</p><div class="action-row">'+button('Probar como administrador','demo-admin','users')+button('Probar como asesora','demo-agent','home')+'</div></div>':'')+
+    (demo&&demoChoices?.length?'<div class="info-box"><strong>Accesos de demostración</strong><p class="small">Usa datos ficticios. Esta versión guarda los cambios en este navegador.</p><div class="action-row">'+(demoChoices.includes('admin')?button('Probar como administrador','demo-admin','users'):'')+(demoChoices.includes('agent')?button('Probar como asesora','demo-agent','home'):'')+'</div></div>':'')+
     '</form>'
   showDialog(setup?'Configura tu administración':'Acceso del equipo',content)
   const form=dialog.querySelector('form')
@@ -20,7 +23,7 @@ export function loginForm({setup,demo},finish){
     if(!['demo-admin','demo-agent'].includes(action))return
     const admin=action==='demo-admin'
     try{
-      const result=await api('login',{method:'POST',data:{username:admin?'admin':'daniela.ruiz',demoChoice:admin?'admin':'agent'}})
+      const result=await api('login',{method:'POST',data:{demoChoice:admin?'admin':'agent'}})
       dialog.close()
       await finish(result)
     }catch(error){form.querySelector('.error-text').textContent=error.message}
@@ -113,18 +116,15 @@ function photoControls(form,initial,many){
   return items
 }
 
-export function propertyForm(item={},user,isAdmin,finish){
+export function propertyForm(item={},user,isAdmin,locations,finish){
   const owner=item.privateData||{}
   const areaOptions=['Urbano','Rústico']
   const content='<form class="form" id="property-form">'+
     '<div class="form-banner"><span>'+icon('users')+' Asesor responsable · '+esc(item.author||user.name)+'</span><span>'+esc(owner.date||local())+'</span></div>'+
-    '<fieldset><legend>Datos del inmueble</legend>'+fields(
+    '<fieldset><legend>Datos del inmueble</legend>'+locationPicker({key:'property',city:item.city||'Cuenca',sector:item.sector,locations,required:true})+fields(
       field('title','Título de la propiedad',item.title,{required:true,span:true,placeholder:'Ej. Casa junto a Las Catalinas',extra:'maxlength="110"'}),
       selectField('category','Categoría de catálogo',categories,item.category,{required:true,placeholder:'Elige una categoría'}),
       selectField('type','Tipo de inmueble',types,item.type,{required:true,placeholder:'Elige un tipo'}),
-      field('city','Ciudad',item.city||'Cuenca',{required:true}),
-      field('sector','Sector',item.sector,{required:true}),
-      field('province','Provincia',item.province||'Azuay'),
       field('code','Código de captación',item.code),
       num('price','Precio de publicación en USD',item.price),
       selectField('condition','Estado',conditions,item.condition,{placeholder:'Seleccionar'}),
@@ -158,17 +158,24 @@ export function propertyForm(item={},user,isAdmin,finish){
       num('owner-commission','Comisión convenida (%)',owner.commission),
       areaField('owner-cavida','Observaciones de cabida',owner.cavida),areaField('owner-observations','Observaciones internas',owner.observations)
     )+checkField('owner-permission','Autorización de corretaje registrada',owner.permission))+
-    checkField('published','Visible en el catálogo público',item.published??true)+
+    '<fieldset><legend>Disponibilidad y difusión</legend>'+selectField('social','Permiso para publicar en redes',
+      [['pending','Por confirmar'],['allowed','Autorizada'],['blocked','No autorizada']],item.social||'pending',{required:true})+
+    '<p class="small">El permiso para redes es independiente de la visibilidad en el catálogo.</p>'+
+    checkField('published','Visible en el catálogo público',item.published??true)+'</fieldset>'+
     (isAdmin?checkField('featured','Destacar en la portada del panel',item.featured):'')+
     actions(item.id?'Guardar cambios':'Guardar propiedad')+'</form>'
   showDialog(item.id?'Editar captación':'Nueva captación',content,{wide:true})
   const form=dialog.querySelector('form')
   const photos=photoControls(form,item.photos||[],true)
+  const location=form.querySelector('[data-location-picker]')
+  bindLocationPicker(location,locations)
   const save=input=>{
+    const {city,sector}=readLocation(location)
+    if(!city||!sector)throw Error('Selecciona una ciudad y un sector del listado.')
     const draft=new FormData(form)
     const privateData=Object.fromEntries(Object.entries(input).filter(([key])=>key.startsWith('owner-')).map(([key,value])=>[key.slice(6),value]))
     return api('properties'+(item.id?'/'+item.id:''),{method:item.id?'PUT':'POST',data:{
-      ...input,photos,privateData,updated:item.updated,services:draft.getAll('services'),amenities:draft.getAll('amenities'),benefits:draft.getAll('benefits')
+      ...input,city,sector,photos,privateData,updated:item.updated,services:draft.getAll('services'),amenities:draft.getAll('amenities'),benefits:draft.getAll('benefits')
     }})
   }
   bindSubmit(form,save,finish)
@@ -207,37 +214,71 @@ export function birthdayForm(item={},team=[],finish){
     photoField(false)+actions()+'</form>')
   const form=dialog.querySelector('form')
   const photos=photoControls(form,item.overridePhoto?[item.overridePhoto]:[],false)
-  form.elements.person?.addEventListener('change',event=>{
-    const person=team.find(candidate=>candidate.id===event.target.value)
-    if(person)form.elements.name.value=person.name
-  })
+  linkName(form,team)
   bindSubmit(form,input=>saveRecord('birthdays',item,{name:input.name,date:'2000-'+input.month+'-'+input.day,photo:photos[0]||'',personId:input.person||''}),finish)
+}
+
+function linkName(form,team){
+  const selection=form.elements.person
+  if(!selection)return
+  const sync=()=>{
+    const person=team.find(candidate=>candidate.id===selection.value)
+    form.elements.name.readOnly=!!person
+    if(person)form.elements.name.value=person.name
+  }
+  selection.addEventListener('change',sync)
+  sync()
 }
 
 export function rosterForm(item={},team=[],finish){
   showDialog(item.id?'Editar participante':'Agregar participante','<form class="form">'+
-    (team.length?selectField('person','Elegir integrante',team.map(person=>[person.name,person.name]),item.name,{placeholder:'Escribir otro nombre'}):'')+
+    (team.length?selectField('person','Elegir integrante',team.map(person=>[person.id,person.name]),item.personId,{placeholder:'Escribir otro nombre'}):'')+
     field('name','Nombre para la rotación',item.name,{required:true})+
     checkField('active','Participa en próximos turnos',item.active===undefined||!!item.active)+
     '<p class="small">El calendario conserva los turnos ya asignados hasta hoy y ajusta los siguientes.</p>'+actions()+'</form>')
   const form=dialog.querySelector('form')
-  form.elements.person?.addEventListener('change',event=>{if(event.target.value)form.elements.name.value=event.target.value})
-  bindSubmit(form,input=>saveRecord('roster',item,{...input,active:!!input.active}),finish)
+  linkName(form,team)
+  bindSubmit(form,input=>saveRecord('roster',item,{name:input.name,personId:input.person||'',active:!!input.active}),finish)
 }
 
 export function userForm(item={},finish){
   showDialog(item.id?'Editar cuenta':'Nueva cuenta','<form class="form">'+
     fields(field('name','Nombre y apellido',item.name,{required:true}),
-      field('username','Usuario',item.username,{required:true,extra:'autocomplete="off" autocapitalize="none" pattern="[a-zA-Z0-9._\\-]{3,50}"'}),
-      field('password',item.id?'Restablecer contraseña':'Asignar contraseña','',{type:'password',extra:'autocomplete="new-password" minlength="10"'})
-    )+
-    '<p class="small">'+(item.id?'Deja la contraseña vacía para conservar la actual.':'La contraseña debe tener al menos 10 caracteres.')+'</p>'+
+      field('username','Usuario',item.username,{required:true,extra:'autocomplete="off" autocapitalize="none" minlength="3" maxlength="50"'}))+
+    (!item.id?field('password','Contraseña de prueba','',{type:'password',extra:'autocomplete="new-password" minlength="10" maxlength="180"'}):'')+
     '<fieldset><legend>Roles de la cuenta</legend>'+checkGroup('roles',Object.entries(roles),item.roles||['agent'])+'</fieldset>'+
     photoField(false)+checkField('active','Habilitar acceso',item.active??false)+actions()+'</form>')
   const form=dialog.querySelector('form')
   const photos=photoControls(form,item.photo?[item.photo]:[],false)
   bindSubmit(form,input=>saveRecord('users',item,{...input,photo:photos[0]||'',roles:new FormData(form).getAll('roles')}),finish)
 }
+export function passwordForm(account,finish){
+  showDialog('Restablecer contraseña','<form class="form"><p>Cuenta de '+esc(account.name)+
+    '. La nueva contraseña se muestra aquí antes de guardar y el cambio cierra sus sesiones de prueba.</p>'+
+    field('password','Nueva contraseña de prueba','',{type:'password',required:true,extra:'autocomplete="new-password" minlength="10" maxlength="180"'})+
+    checkField('reveal','Mostrar nueva contraseña')+actions('Restablecer contraseña')+'</form>')
+  const form=dialog.querySelector('form')
+  form.elements.reveal.addEventListener('change',()=>{form.elements.password.type=form.elements.reveal.checked?'text':'password'})
+  bindSubmit(form,data=>api('password/'+encodeURIComponent(account.id),{method:'PUT',data:{password:data.password}}),finish)
+}
+export function reportForm(item={},week=weekStart(),finish){
+  showDialog(item.id?'Editar reporte semanal':'Nuevo reporte semanal','<form class="form">'+
+    field('week','Fecha de la semana',item.week||week,{type:'date',required:true,extra:'max="'+local()+'"'})+
+    '<p class="small">Se registra la semana de lunes a domingo. El texto es visible para ti y para la administración.</p>'+
+    areaField('note','Reporte por escrito',item.note,'Captaciones, visitas, seguimiento, resultados y prioridades.')+
+    actions('Guardar reporte')+'</form>',{wide:true})
+  const form=dialog.querySelector('form')
+  form.elements.note.required=true
+  form.elements.note.maxLength=6000
+  bindSubmit(form,input=>saveRecord('reports',item,input),finish)
+}
+export function sectorForm(finish){
+  showDialog('Agregar sector al directorio','<form class="form">'+selectField('city','Ciudad',cities,'Cuenca',{required:true})+
+    field('sector','Nombre del sector','',{required:true,extra:'maxlength="120"'})+
+    '<p class="small">El sector quedará disponible en el buscador y en el formulario de captación.</p>'+actions('Guardar sector')+'</form>')
+  bindSubmit(dialog.querySelector('form'),input=>saveRecord('sectors',{},input),finish)
+}
+
 function saveRecord(route,item,data){
   return api(route+(item.id?'/'+item.id:''),{method:item.id?'PUT':'POST',data})
 }
