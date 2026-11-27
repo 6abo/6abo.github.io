@@ -1,7 +1,7 @@
-import {categories,isoToday,roles,monthDates,fold} from './model.js'
-import {rotate} from './rotation.js'
-import {cityName,locationKey,provinces,sectorList} from './sectors.js'
-import {validDate,weekStart} from './reporting.js'
+import {categories,isoToday,roles,monthDates,fold} from './model.js?v=20261127'
+import {rotate} from './rotation.js?v=20261127'
+import {cityName,locationKey,provinces,sectorList} from './sectors.js?v=20261127'
+import {validDate,weekStart} from './reporting.js?v=20261127'
 
 const prefix='rg.panel.demo.2.'
 const originalNames=['Daniela Ruiz','Mateo Vega','Sofía Arias','Pablo Mora','Lucía Torres','Andrea León','Esteban Cruz']

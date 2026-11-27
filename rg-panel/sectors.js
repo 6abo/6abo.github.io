@@ -1,5 +1,5 @@
-import {fold} from './model.js'
-import {quitoBarrios} from './quito-barrios.js'
+import {fold} from './model.js?v=20261127'
+import {quitoBarrios} from './quito-barrios.js?v=20261127'
 
 export const provinces={Cuenca:'Azuay',Quito:'Pichincha',Guayaquil:'Guayas'}
 export const cities=Object.keys(provinces)

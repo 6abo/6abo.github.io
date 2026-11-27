@@ -1,6 +1,6 @@
-import {cities,locationKey,sectorList,cityName} from './sectors.js'
-import {fold} from './model.js'
-import {attr,esc,options} from './ui.js'
+import {cities,locationKey,sectorList,cityName} from './sectors.js?v=20261127'
+import {fold} from './model.js?v=20261127'
+import {attr,esc,options} from './ui.js?v=20261127'
 
 function choices(locations,city){
   return (city?[city]:cities).flatMap(place=>{

@@ -1,6 +1,6 @@
-import {cities} from './sectors.js'
-import {summarizeListings,shiftDate} from './reporting.js'
-import {attr,button,dataId,empty,esc,options,quantity} from './ui.js'
+import {cities} from './sectors.js?v=20261127'
+import {summarizeListings,shiftDate} from './reporting.js?v=20261127'
+import {attr,button,dataId,empty,esc,options,quantity} from './ui.js?v=20261127'
 
 const number=value=>esc(quantity(value))
 const ownReport=(rows,ownerId,week)=>rows.find(report=>report.ownerId===ownerId&&report.week===week)

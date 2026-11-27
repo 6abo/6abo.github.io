@@ -1,12 +1,12 @@
-import {categories,roles,TZ,isoToday,monthDates,fold} from './model.js'
+import {categories,roles,TZ,isoToday,monthDates,fold} from './model.js?v=20261127'
 import {api,icon,esc,attr,price,quantity,capitalize,monthTitle,dayTitle,shortMonth,media,originalMedia,imageUrl,cls,
-  options,avatar,button,iconButton,dataId,empty,loader,dialog,showDialog,notify} from './ui.js'
-import {advertisement} from './photos.js'
-import {loginForm,propertyForm,eventForm,requestForm,birthdayForm,rosterForm,userForm,passwordForm,reportForm,sectorForm,confirmDelete} from './forms.js'
-import {locationKey} from './sectors.js'
-import {locationPicker,bindLocationPicker} from './location-picker.js'
-import {weekStart,summarizeListings,sectorsCsv} from './reporting.js'
-import {reportsView} from './reports-view.js'
+  options,avatar,button,iconButton,dataId,empty,loader,dialog,showDialog,notify} from './ui.js?v=20261127'
+import {advertisement} from './photos.js?v=20261127'
+import {loginForm,propertyForm,eventForm,requestForm,birthdayForm,rosterForm,userForm,passwordForm,reportForm,sectorForm,confirmDelete} from './forms.js?v=20261127'
+import {locationKey} from './sectors.js?v=20261127'
+import {locationPicker,bindLocationPicker} from './location-picker.js?v=20261127'
+import {weekStart,summarizeListings,sectorsCsv} from './reporting.js?v=20261127'
+import {reportsView} from './reports-view.js?v=20261127'
 
 const root=document.querySelector('#app')
 const pages={

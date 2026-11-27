@@ -1,4 +1,4 @@
-import {api,imageUrl,price,quantity} from './ui.js'
+import {api,imageUrl,price,quantity} from './ui.js?v=20261127'
 
 function loadImage(url){
   return new Promise((resolve,reject)=>{

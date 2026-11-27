@@ -1,9 +1,9 @@
-import {categories,types,conditions,services,amenities,benefits,roles,isoToday} from './model.js'
-import {api,attr,esc,button,icon,iconButton,dialog,showDialog,notify,field,selectField,areaField,checkField,checkGroup,fields,section,actions,media,loader,dataId} from './ui.js'
-import {uploadPhoto} from './photos.js'
-import {cities} from './sectors.js'
-import {locationPicker,readLocation,bindLocationPicker} from './location-picker.js'
-import {weekStart} from './reporting.js'
+import {categories,types,conditions,services,amenities,benefits,roles,isoToday} from './model.js?v=20261127'
+import {api,attr,esc,button,icon,iconButton,dialog,showDialog,notify,field,selectField,areaField,checkField,checkGroup,fields,section,actions,media,loader,dataId} from './ui.js?v=20261127'
+import {uploadPhoto} from './photos.js?v=20261127'
+import {cities} from './sectors.js?v=20261127'
+import {locationPicker,readLocation,bindLocationPicker} from './location-picker.js?v=20261127'
+import {weekStart} from './reporting.js?v=20261127'
 
 const num=(name,label,value,step='0.01')=>field(name,label,value,{type:'number',extra:'min="0" step="'+step+'"'})
 const local=isoToday

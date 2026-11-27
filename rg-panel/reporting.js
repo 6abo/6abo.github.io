@@ -1,5 +1,5 @@
-import {isoToday} from './model.js'
-import {cityName,locationKey} from './sectors.js'
+import {isoToday} from './model.js?v=20261127'
+import {cityName,locationKey} from './sectors.js?v=20261127'
 
 export function shiftDate(date,days){
   const point=new Date(date+'T12:00:00Z')
